@@ -11,12 +11,28 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ImageSourcePropType,
 } from 'react-native';
 import { Colors, Fonts, Sizes } from '../../../constants/styles';
 
 const { width } = Dimensions.get('window');
 
-const paymentOptionsList = [
+/** Types */
+type PaymentOption = {
+  id: string;
+  paymentOption: string;
+  paymentOptionImage: ImageSourcePropType;
+};
+
+type Props = {
+  navigation: {
+    pop: () => void;
+    push: (route: string) => void;
+  };
+};
+
+/** Data */
+const paymentOptionsList: PaymentOption[] = [
   {
     id: '1',
     paymentOption: 'Credit / Debit Card',
@@ -39,9 +55,130 @@ const paymentOptionsList = [
   },
 ];
 
-const PaymentScreen = ({ navigation }) => {
-  const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState(null);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+const PaymentScreen: React.FC<Props> = ({ navigation }) => {
+  const [selectedPaymentMethodId, setSelectedPaymentMethodId] =
+    (useState < string) | (null > null);
+  const [showSuccessDialog, setShowSuccessDialog] = useState<boolean>(false);
+
+  const header = () => (
+    <View style={styles.headerWrapStyle}>
+      <MaterialIcons
+        name="arrow-back"
+        color={Colors.blackColor}
+        size={25}
+        onPress={() => navigation.pop()}
+      />
+      <Text
+        style={{
+          marginLeft: Sizes.fixPadding + 5.0,
+          ...Fonts.blackColor18Bold,
+        }}
+      >
+        PAYMENT
+      </Text>
+    </View>
+  );
+
+  const title = () => (
+    <Text style={styles.titleStyle}>Choose your payment method</Text>
+  );
+
+  const paymentOptions = () =>
+    paymentOptionsList.map((item, index) => (
+      <View key={item.id}>
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => setSelectedPaymentMethodId(item.id)}
+          style={{ marginHorizontal: Sizes.fixPadding + 5.0 }}
+        >
+          <View style={styles.paymentOptionsWrapStyle}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View
+                style={{
+                  ...styles.radioButtonOuterStyle,
+                  borderColor:
+                    selectedPaymentMethodId === item.id
+                      ? Colors.blueColor
+                      : Colors.lightGrayColor,
+                }}
+              >
+                {selectedPaymentMethodId === item.id ? (
+                  <View style={styles.radioButtonInnerStyle} />
+                ) : null}
+              </View>
+              <Text
+                style={{
+                  marginLeft: Sizes.fixPadding + 5.0,
+                  ...Fonts.blackColor16SemiBold,
+                }}
+              >
+                {item.paymentOption}
+              </Text>
+            </View>
+
+            <Image
+              source={item.paymentOptionImage}
+              style={{ width: 40, height: 40 }}
+              resizeMode="contain"
+            />
+          </View>
+
+          {paymentOptionsList.length - 1 === index ? null : (
+            <View
+              style={{
+                backgroundColor: '#e0e0e0',
+                height: 1,
+                marginVertical: Sizes.fixPadding + 10.0,
+              }}
+            />
+          )}
+        </TouchableOpacity>
+      </View>
+    ));
+
+  const payButton = () => (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={() => {
+        setShowSuccessDialog(true);
+        setTimeout(() => {
+          setShowSuccessDialog(false);
+          navigation.push('Home');
+        }, 2000);
+      }}
+      style={styles.payButtonStyle}
+    >
+      <Text style={{ ...Fonts.whiteColor14Bold }}>PAY</Text>
+    </TouchableOpacity>
+  );
+
+  const successDialog = () => (
+    <Dialog
+      visible={showSuccessDialog}
+      onRequestClose={() => setShowSuccessDialog(false)}
+      overlayStyle={styles.dialogWrapStyle}
+    >
+      <View
+        style={{ backgroundColor: Colors.whiteColor, alignItems: 'center' }}
+      >
+        <View style={styles.successIconWrapStyle}>
+          <MaterialIcons name="done" size={50} color={Colors.blackColor} />
+        </View>
+        <Text
+          style={{
+            ...Fonts.blackColor18Bold,
+            marginTop: Sizes.fixPadding + 15.0,
+            marginBottom: Sizes.fixPadding + 10.0,
+          }}
+        >
+          YUPPY !!
+        </Text>
+        <Text style={{ ...Fonts.lightGrayColor16SemiBold }}>
+          Your Payment Received.
+        </Text>
+      </View>
+    </Dialog>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
@@ -57,133 +194,6 @@ const PaymentScreen = ({ navigation }) => {
       {successDialog()}
     </SafeAreaView>
   );
-
-  function successDialog() {
-    return (
-      <Dialog
-        visible={showSuccessDialog}
-        onRequestClose={() => {
-          setShowSuccessDialog(false);
-        }}
-        overlayStyle={styles.dialogWrapStyle}
-      >
-        <View
-          style={{ backgroundColor: Colors.whiteColor, alignItems: 'center' }}
-        >
-          <View style={styles.successIconWrapStyle}>
-            <MaterialIcons name="done" size={50} color={Colors.blackColor} />
-          </View>
-          <Text
-            style={{
-              ...Fonts.blackColor18Bold,
-              marginTop: Sizes.fixPadding + 15.0,
-              marginBottom: Sizes.fixPadding + 10.0,
-            }}
-          >
-            YUPPY !!
-          </Text>
-          <Text style={{ ...Fonts.lightGrayColor16SemiBold }}>
-            Your Payment Received.
-          </Text>
-        </View>
-      </Dialog>
-    );
-  }
-
-  function payButton() {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={() => {
-          setShowSuccessDialog(true);
-          setTimeout(() => {
-            setShowSuccessDialog(false);
-            navigation.push('Home');
-          }, 2000);
-        }}
-        style={styles.payButtonStyle}
-      >
-        <Text style={{ ...Fonts.whiteColor14Bold }}>PAY</Text>
-      </TouchableOpacity>
-    );
-  }
-
-  function paymentOptions() {
-    return paymentOptionsList.map((item, index) => (
-      <View key={`${item.id}`}>
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => setSelectedPaymentMethodId(item.id)}
-          style={{ marginHorizontal: Sizes.fixPadding + 5.0 }}
-        >
-          <View style={styles.paymentOptionsWrapStyle}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View
-                style={{
-                  ...styles.radioButtonOuterStyle,
-                  borderColor:
-                    selectedPaymentMethodId == item.id
-                      ? Colors.blueColor
-                      : Colors.lightGrayColor,
-                }}
-              >
-                {selectedPaymentMethodId == item.id ? (
-                  <View style={styles.radioButtonInnerStyle} />
-                ) : null}
-              </View>
-              <Text
-                style={{
-                  marginLeft: Sizes.fixPadding + 5.0,
-                  ...Fonts.blackColor16SemiBold,
-                }}
-              >
-                {item.paymentOption}
-              </Text>
-            </View>
-            <Image
-              source={item.paymentOptionImage}
-              style={{ width: 40.0, height: 40.0 }}
-              resizeMode="contain"
-            />
-          </View>
-          {paymentOptionsList.length - 1 == index ? null : (
-            <View
-              style={{
-                backgroundColor: '#e0e0e0',
-                height: 1.0,
-                marginVertical: Sizes.fixPadding + 10.0,
-              }}
-            />
-          )}
-        </TouchableOpacity>
-      </View>
-    ));
-  }
-
-  function title() {
-    return <Text style={styles.titleStyle}>Choose your payment method</Text>;
-  }
-
-  function header() {
-    return (
-      <View style={styles.headerWrapStyle}>
-        <MaterialIcons
-          name="arrow-back"
-          color={Colors.blackColor}
-          size={25}
-          onPress={() => navigation.pop()}
-        />
-        <Text
-          style={{
-            marginLeft: Sizes.fixPadding + 5.0,
-            ...Fonts.blackColor18Bold,
-          }}
-        >
-          PAYMENT
-        </Text>
-      </View>
-    );
-  }
 };
 
 const styles = StyleSheet.create({

@@ -11,6 +11,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ListRenderItemInfo,
 } from 'react-native';
 import { Snackbar } from 'react-native-paper';
 import { SwipeListView } from 'react-native-swipe-list-view';
@@ -18,7 +19,28 @@ import { Colors, Fonts, Sizes } from '../../../constants/styles';
 
 const { width } = Dimensions.get('window');
 
-const notificationsList = [
+/** Types */
+type NotificationItem = {
+  key: string;
+  title: string;
+  description: string;
+};
+
+type SwipeValueChange = {
+  key: string;
+  value: number;
+  /** other fields exist on the lib type, but we only need these two */
+};
+
+type Props = {
+  navigation: {
+    pop: () => void;
+    push: (routeName: string) => void;
+  };
+};
+
+/** Data */
+const notificationsList: NotificationItem[] = [
   {
     key: '1',
     title: "Biggest Offers on Men's Fashion!",
@@ -33,24 +55,28 @@ const notificationsList = [
   },
 ];
 
-const rowTranslateAnimatedValues = {};
+/** Animated value store */
+const rowTranslateAnimatedValues: Record<string, Animated.Value> = {};
 
-const NotificationScreen = ({ navigation }) => {
-  const [showSnackBar, setShowSnackBar] = useState(false);
+const NotificationScreen: React.FC<Props> = ({ navigation }) => {
+  const [showSnackBar, setShowSnackBar] = useState<boolean>(false);
+  const [snackBarMsg, setSnackBarMsg] = useState<string>('');
+  const [listData, setListData] =
+    useState<NotificationItem[]>(notificationsList);
 
-  const [snackBarMsg, setSnackBarMsg] = useState('');
-
-  const [listData, setListData] = useState(notificationsList);
-
+  // initialize animated values for each possible row key (plus a safety slot)
   Array(listData.length + 1)
     .fill('')
     .forEach((_, i) => {
-      rowTranslateAnimatedValues[`${i}`] = new Animated.Value(1);
+      const k = `${i}`;
+      if (!rowTranslateAnimatedValues[k]) {
+        rowTranslateAnimatedValues[k] = new Animated.Value(1);
+      }
     });
 
-  const animationIsRunning = useRef(false);
+  const animationIsRunning = useRef<boolean>(false);
 
-  const onSwipeValueChange = swipeData => {
+  const onSwipeValueChange = (swipeData: SwipeValueChange) => {
     const { key, value } = swipeData;
 
     if ((value < -width || value > width) && !animationIsRunning.current) {
@@ -62,28 +88,28 @@ const NotificationScreen = ({ navigation }) => {
       }).start(() => {
         const newData = [...listData];
         const prevIndex = listData.findIndex(item => item.key === key);
-        newData.splice(prevIndex, 1);
-        const removedItem = listData.find(item => item.key === key);
+        if (prevIndex !== -1) {
+          const removedItem = listData[prevIndex];
+          newData.splice(prevIndex, 1);
 
-        setSnackBarMsg(`${removedItem.title} dismissed`);
-
-        setListData(newData);
-
-        setShowSnackBar(true);
-
+          setSnackBarMsg(`${removedItem.title} dismissed`);
+          setListData(newData);
+          setShowSnackBar(true);
+        }
         animationIsRunning.current = false;
       });
     }
   };
 
-  const renderItem = data => (
+  const renderItem = (data: ListRenderItemInfo<NotificationItem>) => (
     <Animated.View
       style={[
         {
-          height: rowTranslateAnimatedValues[data.item.key].interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 120],
-          }),
+          height:
+            rowTranslateAnimatedValues[data.item.key]?.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 120],
+            }) ?? 120,
         },
       ]}
     >
@@ -117,48 +143,42 @@ const NotificationScreen = ({ navigation }) => {
 
   const renderHiddenItem = () => <View style={styles.rowBack} />;
 
-  function header() {
-    return (
-      <View style={styles.headerWrapStyle}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <MaterialIcons
-            name="arrow-back"
-            size={24}
-            color="black"
-            onPress={() => navigation.pop()}
-          />
-          <Text
-            style={{
-              ...Fonts.blackColor18Bold,
-              marginLeft: Sizes.fixPadding + 5.0,
-            }}
-          >
-            MY NOTIFICATIONS
-          </Text>
-        </View>
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => navigation.push('Bag')}
+  const header = () => (
+    <View style={styles.headerWrapStyle}>
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <MaterialIcons
+          name="arrow-back"
+          size={24}
+          color="black"
+          onPress={() => navigation.pop()}
+        />
+        <Text
+          style={{
+            ...Fonts.blackColor18Bold,
+            marginLeft: Sizes.fixPadding + 5.0,
+          }}
         >
-          <FontAwesome5
-            name="shopping-bag"
-            size={24}
-            color={Colors.blackColor}
-          />
-          <View style={styles.shoppingsCountStyle}>
-            <Text style={{ ...Fonts.whiteColor12Medium }}>3</Text>
-          </View>
-        </TouchableOpacity>
+          MY NOTIFICATIONS
+        </Text>
       </View>
-    );
-  }
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => navigation.push('Bag')}
+      >
+        <FontAwesome5 name="shopping-bag" size={24} color={Colors.blackColor} />
+        <View style={styles.shoppingsCountStyle}>
+          <Text style={{ ...Fonts.whiteColor12Medium }}>3</Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
       <StatusBar translucent={false} backgroundColor={Colors.primaryColor} />
       <View style={styles.container}>
         {header()}
-        {listData.length == 0 ? (
+        {listData.length === 0 ? (
           <View
             style={{
               flex: 1,
@@ -190,6 +210,7 @@ const NotificationScreen = ({ navigation }) => {
             leftOpenValue={width}
             onSwipeValueChange={onSwipeValueChange}
             useNativeDriver={false}
+            keyExtractor={item => item.key}
           />
         )}
         <Snackbar

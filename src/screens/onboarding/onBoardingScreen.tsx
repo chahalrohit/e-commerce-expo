@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -8,6 +8,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ImageSourcePropType,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Fonts, Sizes } from '../../../constants/styles';
@@ -19,7 +20,28 @@ const AnimatedAntDesign = Animated.createAnimatedComponent(AntDesign);
 const DURATION = 1000;
 const TEXT_DURATION = DURATION * 0.8;
 
-const quotes = [
+/** Types */
+type Quote = {
+  image: ImageSourcePropType;
+  title: string;
+  descriptions: string;
+};
+
+type NavigationLike = {
+  push: (route: string) => void;
+};
+
+type CircleProps = {
+  navigation: NavigationLike;
+  onPress: () => void;
+  index: number;
+  quotes: Quote[];
+  animatedValue: Animated.Value;
+  animatedValue2: Animated.Value;
+};
+
+/** Data */
+const quotes: Quote[] = [
   {
     image: require('../../assets/images/onboarding_images/onboarding_1.png'),
     title: 'Welcome To STYLO',
@@ -37,16 +59,26 @@ const quotes = [
   },
 ];
 
-const Circle = ({
+const colors: {
+  initialBgColor: string;
+  bgColor: string;
+  nextBgColor: string;
+}[] = [
+  { initialBgColor: '#A36562', bgColor: '#E57373', nextBgColor: '#A36562' },
+  { initialBgColor: '#E91E63', bgColor: '#E57373', nextBgColor: '#E91E63' },
+  { initialBgColor: '#E57373', bgColor: '#E91E63', nextBgColor: '#E57373' },
+];
+
+const Circle: React.FC<CircleProps> = ({
   navigation,
   onPress,
   index,
-  quotes,
   animatedValue,
   animatedValue2,
 }) => {
   const { initialBgColor, nextBgColor, bgColor } = colors[index];
   const inputRange = [0, 0.001, 0.5, 0.501, 1];
+
   const backgroundColor = animatedValue2.interpolate({
     inputRange,
     outputRange: [
@@ -57,6 +89,7 @@ const Circle = ({
       bgColor,
     ],
   });
+
   const dotBgColor = animatedValue2.interpolate({
     inputRange: [0, 0.001, 0.5, 0.501, 0.9, 1],
     outputRange: [
@@ -74,10 +107,11 @@ const Circle = ({
       style={[
         StyleSheet.absoluteFillObject,
         styles.container,
-        { backgroundColor },
+        // Animated color typed as any to satisfy RN style types
+        { backgroundColor } as any,
       ]}
     >
-      {index == 2 ? (
+      {index === 2 ? (
         <Text onPress={onPress} style={styles.startAndSkipTextStyle}>
           Start
         </Text>
@@ -89,37 +123,38 @@ const Circle = ({
           Skip
         </Text>
       )}
+
       <Animated.View
         style={[
           styles.circle,
+          { backgroundColor: dotBgColor } as any,
           {
-            backgroundColor: dotBgColor,
             transform: [
               { perspective: 200 },
               {
                 rotateY: animatedValue2.interpolate({
                   inputRange: [0, 0.5, 1],
                   outputRange: ['0deg', '-90deg', '-180deg'],
-                }),
+                }) as any,
               },
               {
                 scale: animatedValue2.interpolate({
                   inputRange: [0, 0.5, 1],
                   outputRange: [1, 6, 1],
-                }),
+                }) as any,
               },
               {
                 translateX: animatedValue2.interpolate({
                   inputRange: [0, 0.5, 1],
                   outputRange: [1, 0.5, 1],
-                }),
+                }) as any,
               },
             ],
           },
         ]}
       >
         <TouchableOpacity
-          onPress={index == 2 ? () => navigation.push('Login') : onPress}
+          onPress={index === 2 ? () => navigation.push('Login') : onPress}
         >
           <Animated.View
             style={[
@@ -130,23 +165,23 @@ const Circle = ({
                     scale: animatedValue.interpolate({
                       inputRange: [0, 0.05, 0.5, 1],
                       outputRange: [1, 0, 0, 1],
-                    }),
+                    }) as any,
                   },
                   {
                     rotateY: animatedValue.interpolate({
                       inputRange: [0, 0.5, 0.9, 1],
                       outputRange: ['0deg', '180deg', '180deg', '180deg'],
-                    }),
+                    }) as any,
                   },
                 ],
                 opacity: animatedValue.interpolate({
                   inputRange: [0, 0.05, 0.9, 1],
                   outputRange: [1, 0, 0, 1],
-                }),
+                }) as any,
               },
             ]}
           >
-            <AnimatedAntDesign name="arrowright" size={28} color={'white'} />
+            <AnimatedAntDesign name="arrowright" size={28} color="white" />
           </Animated.View>
         </TouchableOpacity>
       </Animated.View>
@@ -154,44 +189,37 @@ const Circle = ({
   );
 };
 
-const colors = [
-  {
-    initialBgColor: '#A36562',
-    bgColor: '#E57373',
-    nextBgColor: '#A36562',
-  },
-  {
-    initialBgColor: '#E91E63',
-    bgColor: '#E57373',
-    nextBgColor: '#E91E63',
-  },
-  {
-    initialBgColor: '#E57373',
-    bgColor: '#E91E63',
-    nextBgColor: '#E57373',
-  },
-];
+type OnboardingProps = {
+  navigation: NavigationLike;
+};
 
-const OnboardingScreen = ({ navigation }) => {
-  const [backClickCount, setBackClickCount] = useState(0);
+const OnboardingScreen: React.FC<OnboardingProps> = ({ navigation }) => {
+  const [backClickCount] = useState<number>(0);
+  const [index, setIndex] = useState<number>(0);
+  const [onCirclePress, setOnCirclePress] = useState<boolean>(false);
+
   const animatedValue = useRef(new Animated.Value(0)).current;
   const animatedValue2 = useRef(new Animated.Value(0)).current;
   const sliderAnimatedValue = useRef(new Animated.Value(0)).current;
+
   const inputRange = [...Array(quotes.length).keys()];
-  const [index, setIndex] = useState(0);
-  const [onCirclePress, setOnCirclePress] = useState(false);
 
-  setTimeout(function () {
-    if (onCirclePress) {
-      setTimeout(() => {
-        setOnCirclePress(false);
-      }, 2000);
-    } else {
-      onPress();
-    }
-  }, 5000);
+  // NOTE: This reproduces the original auto-advance timer,
+  // but scopes it to an effect to avoid multiple timers on re-render.
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (onCirclePress) {
+        const t2 = setTimeout(() => setOnCirclePress(false), 2000);
+        return () => clearTimeout(t2);
+      } else {
+        onPress();
+      }
+    }, 5000);
+    return () => clearTimeout(t);
+    // intentionally include flags that affect behavior
+  }, [index, onCirclePress]);
 
-  const animate = i =>
+  const animate = (i: number) =>
     Animated.parallel([
       Animated.timing(sliderAnimatedValue, {
         toValue: i,
@@ -214,12 +242,20 @@ const OnboardingScreen = ({ navigation }) => {
     animatedValue.setValue(0);
     animatedValue2.setValue(0);
     animate((index + 1) % colors.length).start();
-    setIndex(index != 2 ? index + 1 : 0);
+    setIndex(index !== 2 ? index + 1 : 0);
   };
+
+  const indicator = ({ pageIndex }: { pageIndex: number }) =>
+    index === pageIndex ? (
+      <View style={styles.activeIndicatorStyle} />
+    ) : (
+      <View style={styles.inactiveIndicatorStyle} />
+    );
 
   return (
     <View style={{ flex: 1, justifyContent: 'center' }}>
-      <StatusBar translucent={true} backgroundColor="transparent" />
+      <StatusBar translucent backgroundColor="transparent" />
+
       <Circle
         index={index}
         onPress={() => {
@@ -228,8 +264,10 @@ const OnboardingScreen = ({ navigation }) => {
         }}
         animatedValue={animatedValue}
         animatedValue2={animatedValue2}
+        quotes={quotes}
         navigation={navigation}
       />
+
       <Animated.View
         style={{
           flexDirection: 'row',
@@ -238,7 +276,7 @@ const OnboardingScreen = ({ navigation }) => {
               translateX: sliderAnimatedValue.interpolate({
                 inputRange,
                 outputRange: quotes.map((_, i) => -i * width * 2),
-              }),
+              }) as any,
             },
           ],
           opacity: sliderAnimatedValue.interpolate({
@@ -248,38 +286,37 @@ const OnboardingScreen = ({ navigation }) => {
             outputRange: [...Array(quotes.length * 2 + 1).keys()].map(i =>
               i % 2 === 0 ? 1 : 0,
             ),
-          }),
+          }) as any,
         }}
       >
-        {quotes.map(({ title, descriptions, image }, i) => {
-          return (
-            <View style={{ paddingRight: width, width: width * 2 }} key={i}>
-              <Image
-                source={image}
-                style={{ alignSelf: 'center', width: 200.0, height: 200.0 }}
-                resizeMode="contain"
-              />
-              <Text
-                style={{
-                  marginVertical: Sizes.fixPadding * 2.0,
-                  textAlign: 'center',
-                  ...Fonts.whiteColor25Bold,
-                }}
-              >
-                {title}
-              </Text>
-              <Text style={styles.descriptionTextStyle}>{descriptions}</Text>
-              <View style={styles.pageIndicatorWrapStyle}>
-                {indicator({ pageIndex: 0 })}
-                {indicator({ pageIndex: 1 })}
-                {indicator({ pageIndex: 2 })}
-              </View>
+        {quotes.map(({ title, descriptions, image }, i) => (
+          <View style={{ paddingRight: width, width: width * 2 }} key={i}>
+            <Image
+              source={image}
+              style={{ alignSelf: 'center', width: 200, height: 200 }}
+              resizeMode="contain"
+            />
+            <Text
+              style={{
+                marginVertical: Sizes.fixPadding * 2.0,
+                textAlign: 'center',
+                ...Fonts.whiteColor25Bold,
+              }}
+            >
+              {title}
+            </Text>
+            <Text style={styles.descriptionTextStyle}>{descriptions}</Text>
+            <View style={styles.pageIndicatorWrapStyle}>
+              {indicator({ pageIndex: 0 })}
+              {indicator({ pageIndex: 1 })}
+              {indicator({ pageIndex: 2 })}
             </View>
-          );
-        })}
+          </View>
+        ))}
       </Animated.View>
-      {backClickCount == 1 ? (
-        <View style={[styles.animatedView]}>
+
+      {backClickCount === 1 ? (
+        <View style={styles.animatedView}>
           <Text style={{ ...Fonts.whiteColor14SemiBold }}>
             Press Back Once Again to Exit
           </Text>
@@ -287,14 +324,6 @@ const OnboardingScreen = ({ navigation }) => {
       ) : null}
     </View>
   );
-
-  function indicator({ pageIndex }) {
-    return index == pageIndex ? (
-      <View style={styles.activeIndicatorStyle} />
-    ) : (
-      <View style={styles.inactiveIndicatorStyle} />
-    );
-  }
 };
 
 const styles = StyleSheet.create({
@@ -330,19 +359,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeIndicatorStyle: {
-    width: 20.0,
-    height: 20.0,
-    borderRadius: 10.0,
-    borderWidth: 2.0,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
     marginHorizontal: Sizes.fixPadding - 5.0,
     borderColor: 'rgba(255,255,255,0.5)',
     backgroundColor: 'rgba(255,255,255,0.5)',
   },
   inactiveIndicatorStyle: {
-    width: 20.0,
-    height: 20.0,
-    borderRadius: 10.0,
-    borderWidth: 2.0,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
     marginHorizontal: Sizes.fixPadding - 5.0,
     borderColor: 'rgba(255,255,255,0.5)',
   },

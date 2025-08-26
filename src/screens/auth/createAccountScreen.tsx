@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import React, { useState } from 'react';
+import React, { JSX, useState } from 'react';
 import {
   Image,
   SafeAreaView,
@@ -14,32 +14,28 @@ import {
 } from 'react-native';
 import { Colors, Fonts, Sizes } from '../../../constants/styles';
 
-const CreateAccountScreen = ({ navigation }) => {
-  const [email, setEmail] = useState(null);
-  const [emailFocus, setEmailFocus] = useState(false);
-  const [password, setPassword] = useState(null);
-  const [passwordFocus, setPasswordFocus] = useState(false);
-  const [username, setUsername] = useState(null);
-  const [usernameFocus, setUsernameFocus] = useState(false);
-  const [repeatPassword, setRepeatPassword] = useState(null);
-  const [repeatPaswordFocus, setRepeatPasswordFocus] = useState(false);
+interface NavigationProps {
+  push: (screen: string) => void;
+}
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
-      <StatusBar translucent={false} backgroundColor={Colors.primaryColor} />
-      <View style={{ flex: 1 }}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingTop: Sizes.fixPadding * 10.0 }}
-        >
-          {appLogo()}
-          {createAccountInfo()}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
-  );
+interface CreateAccountScreenProps {
+  navigation: NavigationProps;
+}
 
-  function createAccountInfo() {
+const CreateAccountScreen: React.FC<CreateAccountScreenProps> = ({
+  navigation,
+}) => {
+  const [email, setEmail] = useState<string>('');
+  const [emailFocus, setEmailFocus] = useState<boolean>(false);
+  const [password, setPassword] = useState<string>('');
+  const [passwordFocus, setPasswordFocus] = useState<boolean>(false);
+  const [username, setUsername] = useState<string>('');
+  const [usernameFocus, setUsernameFocus] = useState<boolean>(false);
+  const [repeatPassword, setRepeatPassword] = useState<string>('');
+  const [repeatPasswordFocus, setRepeatPasswordFocus] =
+    useState<boolean>(false);
+
+  const createAccountInfo = (): JSX.Element => {
     return (
       <View style={styles.createAccountInfoWrapStyle}>
         {userNameTextField()}
@@ -59,9 +55,9 @@ const CreateAccountScreen = ({ navigation }) => {
         </Text>
       </View>
     );
-  }
+  };
 
-  function createAccountButton() {
+  const createAccountButton = (): JSX.Element => {
     return (
       <TouchableOpacity
         activeOpacity={0.9}
@@ -71,14 +67,14 @@ const CreateAccountScreen = ({ navigation }) => {
         <Text style={{ ...Fonts.whiteColor15Bold }}>CREATE ACCOUNT</Text>
       </TouchableOpacity>
     );
-  }
+  };
 
-  function repeatPasswordTextField() {
+  const repeatPasswordTextField = (): JSX.Element => {
     return (
       <View style={styles.textFieldWrapStyle}>
         <MaterialCommunityIcons
           name="shield-check"
-          color={repeatPaswordFocus ? Colors.primaryColor : Colors.grayColor}
+          color={repeatPasswordFocus ? Colors.primaryColor : Colors.grayColor}
           size={24}
         />
         <TextInput
@@ -86,7 +82,7 @@ const CreateAccountScreen = ({ navigation }) => {
           selectionColor={Colors.primaryColor}
           placeholder="Repeat Password"
           value={repeatPassword}
-          onChangeText={text => setRepeatPassword(text)}
+          onChangeText={(text: string) => setRepeatPassword(text)}
           onFocus={() => setRepeatPasswordFocus(true)}
           onBlur={() => setRepeatPasswordFocus(false)}
           style={{
@@ -97,9 +93,9 @@ const CreateAccountScreen = ({ navigation }) => {
         />
       </View>
     );
-  }
+  };
 
-  function userNameTextField() {
+  const userNameTextField = (): JSX.Element => {
     return (
       <View style={styles.textFieldWrapStyle}>
         <MaterialIcons
@@ -111,7 +107,7 @@ const CreateAccountScreen = ({ navigation }) => {
           selectionColor={Colors.primaryColor}
           placeholder="Username"
           value={username}
-          onChangeText={text => setUsername(text)}
+          onChangeText={(text: string) => setUsername(text)}
           onFocus={() => setUsernameFocus(true)}
           onBlur={() => setUsernameFocus(false)}
           style={{
@@ -122,9 +118,9 @@ const CreateAccountScreen = ({ navigation }) => {
         />
       </View>
     );
-  }
+  };
 
-  function passwordTextField() {
+  const passwordTextField = (): JSX.Element => {
     return (
       <View style={styles.textFieldWrapStyle}>
         <MaterialIcons
@@ -137,7 +133,7 @@ const CreateAccountScreen = ({ navigation }) => {
           selectionColor={Colors.primaryColor}
           placeholder="Password"
           value={password}
-          onChangeText={text => setPassword(text)}
+          onChangeText={(text: string) => setPassword(text)}
           onFocus={() => setPasswordFocus(true)}
           onBlur={() => setPasswordFocus(false)}
           style={{
@@ -149,9 +145,9 @@ const CreateAccountScreen = ({ navigation }) => {
         />
       </View>
     );
-  }
+  };
 
-  function emailTextField() {
+  const emailTextField = (): JSX.Element => {
     return (
       <View style={styles.textFieldWrapStyle}>
         <MaterialIcons
@@ -163,7 +159,7 @@ const CreateAccountScreen = ({ navigation }) => {
           selectionColor={Colors.primaryColor}
           placeholder="Email"
           value={email}
-          onChangeText={text => setEmail(text)}
+          onChangeText={(text: string) => setEmail(text)}
           onFocus={() => setEmailFocus(true)}
           onBlur={() => setEmailFocus(false)}
           style={{
@@ -175,9 +171,9 @@ const CreateAccountScreen = ({ navigation }) => {
         />
       </View>
     );
-  }
+  };
 
-  function appLogo() {
+  const appLogo = (): JSX.Element => {
     return (
       <Image
         source={require('../../assets/images/logo/stylo_transparent.png')}
@@ -185,7 +181,22 @@ const CreateAccountScreen = ({ navigation }) => {
         resizeMode="contain"
       />
     );
-  }
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
+      <StatusBar translucent={false} backgroundColor={Colors.primaryColor} />
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingTop: Sizes.fixPadding * 10.0 }}
+        >
+          {appLogo()}
+          {createAccountInfo()}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({

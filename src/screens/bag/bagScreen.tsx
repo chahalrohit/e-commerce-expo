@@ -1,9 +1,10 @@
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import React, { useRef, useState } from 'react';
+import React, { FC, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
   Image,
+  ImageSourcePropType,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -14,10 +15,20 @@ import {
 import { Snackbar } from 'react-native-paper';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import type { ListRenderItem } from 'react-native';
+import type { NavigationProp } from '@react-navigation/native';
 
 const { width } = Dimensions.get('window');
 
-const bagsData = [
+type BagItem = {
+  key: string;
+  productImage: ImageSourcePropType;
+  productTitle: string;
+  productPrice: number;
+  productSize: string;
+};
+
+const bagsData: BagItem[] = [
   {
     key: '1',
     productImage: require('../../assets/images/products/product_20.jpg'),
@@ -41,22 +52,34 @@ const bagsData = [
   },
 ];
 
-const rowTranslateAnimatedValues = {};
+const rowTranslateAnimatedValues: Record<string, Animated.Value> = {};
 
-const BagScreen = ({ navigation }) => {
-  const [showSnackBar, setShowSnackBar] = useState(false);
+type Props = {
+  navigation: NavigationProp<any>;
+};
 
-  const [listData, setListData] = useState(bagsData);
+type SwipeChange = {
+  key: string;
+  value: number;
+  // direction / isOpen may exist on the lib type; not needed for our logic
+};
+
+const BagScreen: FC<Props> = ({ navigation }) => {
+  const [showSnackBar, setShowSnackBar] = useState<boolean>(false);
+  const [listData, setListData] = useState<BagItem[]>(bagsData);
 
   Array(listData.length + 1)
     .fill('')
     .forEach((_, i) => {
-      rowTranslateAnimatedValues[`${i}`] = new Animated.Value(1);
+      const k = `${i}`;
+      if (!rowTranslateAnimatedValues[k]) {
+        rowTranslateAnimatedValues[k] = new Animated.Value(1);
+      }
     });
 
-  const animationIsRunning = useRef(false);
+  const animationIsRunning = useRef<boolean>(false);
 
-  const onSwipeValueChange = swipeData => {
+  const onSwipeValueChange = (swipeData: SwipeChange) => {
     const { key, value } = swipeData;
 
     if ((value < -width || value > width) && !animationIsRunning.current) {
@@ -68,40 +91,37 @@ const BagScreen = ({ navigation }) => {
       }).start(() => {
         const newData = [...listData];
         const prevIndex = listData.findIndex(item => item.key === key);
-        newData.splice(prevIndex, 1);
-
-        setListData(newData);
-
-        setShowSnackBar(true);
-
+        if (prevIndex !== -1) {
+          newData.splice(prevIndex, 1);
+          setListData(newData);
+          setShowSnackBar(true);
+        }
         animationIsRunning.current = false;
       });
     }
   };
 
-  function updateBags({ key }) {
-    const newList = listData.filter(product => product.key != key);
+  function updateBags({ key }: { key: string }) {
+    const newList = listData.filter(product => product.key !== key);
     setListData(newList);
     setShowSnackBar(true);
   }
 
-  const renderItem = data => (
+  const renderItem: ListRenderItem<BagItem> = ({ item }) => (
     <Animated.View
       style={[
         {
-          height: rowTranslateAnimatedValues[data.item.key].interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 170],
-          }),
+          height:
+            rowTranslateAnimatedValues[item.key]?.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 170],
+            }) ?? 170,
         },
       ]}
     >
       <View style={{ flex: 1, backgroundColor: Colors.backColor }}>
         <View style={styles.productWrapStyle}>
-          <Image
-            source={data.item.productImage}
-            style={styles.productImageStyle}
-          />
+          <Image source={item.productImage} style={styles.productImageStyle} />
           <View
             style={{
               marginVertical: Sizes.fixPadding,
@@ -113,8 +133,9 @@ const BagScreen = ({ navigation }) => {
                 maxWidth: width - 150,
                 ...Fonts.blackColor15SemiBold,
               }}
+              numberOfLines={2}
             >
-              {data.item.productTitle}
+              {item.productTitle}
             </Text>
             <View
               style={{
@@ -132,8 +153,8 @@ const BagScreen = ({ navigation }) => {
                 Price:
               </Text>
               <Text style={{ ...Fonts.blueColor13SemiBold }}>
-                {`$`}
-                {data.item.productPrice}
+                {'$'}
+                {item.productPrice}
               </Text>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -144,11 +165,11 @@ const BagScreen = ({ navigation }) => {
                   ...Fonts.blueColor13SemiBold,
                 }}
               >
-                {data.item.productSize}
+                {item.productSize}
               </Text>
               <TouchableOpacity
                 activeOpacity={0.9}
-                onPress={() => updateBags({ key: data.item.key })}
+                onPress={() => updateBags({ key: item.key })}
                 style={styles.removeButtonStyle}
               >
                 <Text style={{ ...Fonts.whiteColor12SemiBold }}>Remove</Text>
@@ -160,40 +181,7 @@ const BagScreen = ({ navigation }) => {
     </Animated.View>
   );
 
-  const renderHiddenItem = () => <View style={styles.rowBack}></View>;
-
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
-      <StatusBar backgroundColor={Colors.primaryColor} />
-      <View style={{ flex: 1 }}>
-        {header()}
-        <View style={{ flex: 1, backgroundColor: Colors.backColor }}>
-          {listData.length == 0 ? (
-            <>{bagEmptyInfo()}</>
-          ) : (
-            <SwipeListView
-              data={listData}
-              renderItem={renderItem}
-              renderHiddenItem={renderHiddenItem}
-              rightOpenValue={-width}
-              leftOpenValue={width}
-              onSwipeValueChange={onSwipeValueChange}
-              useNativeDriver={false}
-            />
-          )}
-          {totalPriceAndPayButton()}
-          <Snackbar
-            style={styles.snackBarStyle}
-            visible={showSnackBar}
-            onDismiss={() => setShowSnackBar(false)}
-            elevation={0}
-          >
-            <Text style={{ ...Fonts.whiteColor12Medium }}>Item Removed</Text>
-          </Snackbar>
-        </View>
-      </View>
-    </SafeAreaView>
-  );
+  const renderHiddenItem = () => <View style={styles.rowBack} />;
 
   function bagEmptyInfo() {
     return (
@@ -207,11 +195,11 @@ const BagScreen = ({ navigation }) => {
           Hey, it feels so light!
         </Text>
         <Text style={styles.nothingInBagTextStyle}>
-          {`There is nothing in your bag.Let's add some items.`}
+          {"There is nothing in your bag.Let's add some items."}
         </Text>
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => navigation.push('Home')}
+          onPress={() => navigation.push('Home' as never)}
           style={styles.addItemsToBagButtonStyle}
         >
           <Text style={{ ...Fonts.primaryColor16Bold }}>ADD ITEMS TO BAG</Text>
@@ -221,13 +209,10 @@ const BagScreen = ({ navigation }) => {
   }
 
   function totalPriceAndPayButton() {
+    const total = listData.reduce((s, { productPrice }) => s + productPrice, 0);
+    const canPay = listData.length !== 0;
     return (
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}
-      >
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={styles.totalPriceButtonStyle}>
           <Text
             style={{ marginRight: Sizes.fixPadding, ...Fonts.blackColor13Bold }}
@@ -235,21 +220,18 @@ const BagScreen = ({ navigation }) => {
             TOTAL:
           </Text>
           <Text style={{ ...Fonts.primaryColor14Bold }}>
-            {`$`}
-            {listData.reduce((s, { productPrice }) => s + productPrice, 0)}
+            {'$'}
+            {total}
           </Text>
         </View>
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() =>
-            listData.length != 0 ? navigation.push('Delivery') : null
-          }
+          onPress={() => (canPay ? navigation.push('Delivery' as never) : null)}
           style={{
             ...styles.payNowButtonStyle,
-            backgroundColor:
-              listData.length == 0
-                ? Colors.lightGrayColor
-                : Colors.primaryColor,
+            backgroundColor: canPay
+              ? Colors.primaryColor
+              : Colors.lightGrayColor,
           }}
         >
           <Text style={{ ...Fonts.whiteColor14Bold }}>PAY NOW</Text>
@@ -278,6 +260,40 @@ const BagScreen = ({ navigation }) => {
       </View>
     );
   }
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
+      <StatusBar backgroundColor={Colors.primaryColor} />
+      <View style={{ flex: 1 }}>
+        {header()}
+        <View style={{ flex: 1, backgroundColor: Colors.backColor }}>
+          {listData.length === 0 ? (
+            bagEmptyInfo()
+          ) : (
+            <SwipeListView
+              data={listData}
+              renderItem={renderItem}
+              renderHiddenItem={renderHiddenItem}
+              rightOpenValue={-width}
+              leftOpenValue={width}
+              onSwipeValueChange={onSwipeValueChange}
+              useNativeDriver={false}
+              keyExtractor={item => item.key}
+            />
+          )}
+          {totalPriceAndPayButton()}
+          <Snackbar
+            style={styles.snackBarStyle}
+            visible={showSnackBar}
+            onDismiss={() => setShowSnackBar(false)}
+            elevation={0}
+          >
+            <Text style={{ ...Fonts.whiteColor12Medium }}>Item Removed</Text>
+          </Snackbar>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({

@@ -1,5 +1,5 @@
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import React from 'react';
+import React, { JSX } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -9,62 +9,80 @@ import {
   View,
 } from 'react-native';
 import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-const returnOrExchangeSteps = [
+// ---------- TYPES ----------
+
+// Replace with your actual RootStackParamList if you have defined one
+type RootStackParamList = {
+  Faq: undefined;
+  // add other screens like Home, Profile if necessary
+};
+
+type FaqScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Faq'>;
+
+type FaqScreenProps = {
+  navigation: FaqScreenNavigationProp;
+};
+
+type ReplacementStep =
+  | {
+      step: number;
+      title: string;
+      steps?: string[];
+      description?: string;
+    }
+  | {
+      step: number;
+      title: string;
+      description: string;
+      steps?: undefined;
+    };
+
+// ---------- DATA ----------
+
+const returnOrExchangeSteps: string[] = [
   'Go to My Orders',
   'Choose the item you wish to return or exchange',
   'Fill in the details',
   'Choose Request Return.',
 ];
 
-const addDeliveryAddressSteps = [
+const addDeliveryAddressSteps: string[] = [
   'Log into your STYLO account',
   'Go to My Account > Settings >',
   'Add details of your new address',
   "Choose 'Save Changes'",
 ];
 
-const replacementProcess = [
+const replacementProcess: ReplacementStep[] = [
   {
     step: 1,
     title: "Create a 'Return Request'",
     steps: [
       'Login to STYLO',
-      'Chosse the item you wish to return or exchange',
+      'Choose the item you wish to return or exchange',
       'Fill in the details',
-      'Choose Request Return',
       'Choose Request Return',
     ],
   },
   {
     step: 2,
     title:
-      'Once the return has been approved, the originally delevered item will be picked up',
+      'Once the return has been approved, the originally delivered item will be picked up',
   },
   {
     step: 3,
-    title: 'Replacement intiated',
+    title: 'Replacement initiated',
     description:
-      'In most cases, the replacement item is delivered to you at the time of pick-up.In all other cases, the replacement/refund is intiated after the originally delivered item is picked up.',
+      'In most cases, the replacement item is delivered to you at the time of pick-up. In all other cases, the replacement/refund is initiated after the originally delivered item is picked up.',
   },
 ];
 
-const FaqScreen = ({ navigation }) => {
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
-      <StatusBar backgroundColor={Colors.primaryColor} />
-      <View style={{ flex: 1 }}>
-        {header()}
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {returnAndExchangeItemInfo()}
-          {addDeliveryAddressToAccountInfo()}
-          {replacementProcessForOrderInfo()}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
-  );
+// ---------- COMPONENT ----------
 
-  function replacementProcessForOrderInfo() {
+const FaqScreen: React.FC<FaqScreenProps> = ({ navigation }) => {
+  const replacementProcessForOrderInfo = (): JSX.Element => {
     return (
       <View style={styles.replacementProcessForOrderInfoWrapStyle}>
         <Text style={{ ...Fonts.blackColor16SemiBold }}>
@@ -95,7 +113,7 @@ const FaqScreen = ({ navigation }) => {
             key={`${index}`}
             style={{
               marginBottom:
-                replacementProcess.length - 1 == index
+                replacementProcess.length - 1 === index
                   ? 0.0
                   : Sizes.fixPadding + 5.0,
             }}
@@ -104,15 +122,15 @@ const FaqScreen = ({ navigation }) => {
               {item.step}. {item.title}
             </Text>
             {item.steps ? (
-              item.steps.map((item, index) => (
-                <View key={`${index}`}>
+              item.steps.map((stepText, i) => (
+                <View key={`step-${i}`}>
                   <Text
                     style={{
                       lineHeight: 20.0,
                       ...Fonts.lightGrayColor12Medium,
                     }}
                   >
-                    - {item}
+                    - {stepText}
                   </Text>
                 </View>
               ))
@@ -129,9 +147,9 @@ const FaqScreen = ({ navigation }) => {
         ))}
       </View>
     );
-  }
+  };
 
-  function addDeliveryAddressToAccountInfo() {
+  const addDeliveryAddressToAccountInfo = (): JSX.Element => {
     return (
       <View style={styles.addDeliveryAddressToAccountInfoWrapStyle}>
         <Text style={{ ...Fonts.blackColor16SemiBold }}>
@@ -153,9 +171,9 @@ const FaqScreen = ({ navigation }) => {
         </View>
       </View>
     );
-  }
+  };
 
-  function returnAndExchangeItemInfo() {
+  const returnAndExchangeItemInfo = (): JSX.Element => {
     return (
       <View style={styles.returnAndExchangeItemInfoWrapStyle}>
         <Text style={{ ...Fonts.blackColor16SemiBold }}>
@@ -177,9 +195,9 @@ const FaqScreen = ({ navigation }) => {
         </View>
       </View>
     );
-  }
+  };
 
-  function header() {
+  const header = (): JSX.Element => {
     return (
       <View style={styles.headerWrapStyle}>
         <MaterialIcons
@@ -198,8 +216,24 @@ const FaqScreen = ({ navigation }) => {
         </Text>
       </View>
     );
-  }
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
+      <StatusBar backgroundColor={Colors.primaryColor} />
+      <View style={{ flex: 1 }}>
+        {header()}
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {returnAndExchangeItemInfo()}
+          {addDeliveryAddressToAccountInfo()}
+          {replacementProcessForOrderInfo()}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
 };
+
+// ---------- STYLES ----------
 
 const styles = StyleSheet.create({
   headerWrapStyle: {

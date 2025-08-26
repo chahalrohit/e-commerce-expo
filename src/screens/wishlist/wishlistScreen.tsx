@@ -1,5 +1,5 @@
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -17,7 +17,24 @@ import { Colors, Fonts, Sizes } from '../../../constants/styles';
 
 const { width } = Dimensions.get('window');
 
-const wishlistsData = [
+type WishlistItem = {
+  key: string;
+  productImage: any; // if you have image module declarations, replace with ImageSourcePropType
+  productTitle: string;
+  productPrice: number;
+  productSize: string;
+};
+
+type NavigationLike = {
+  pop: () => void;
+  push: (route: string) => void;
+};
+
+type Props = {
+  navigation: NavigationLike;
+};
+
+const wishlistsData: WishlistItem[] = [
   {
     key: '1',
     productImage: require('../../assets/images/products/product_21.jpg'),
@@ -34,123 +51,142 @@ const wishlistsData = [
   },
 ];
 
-const rowTranslateAnimatedValues = {};
+const WishlistScreen: React.FC<Props> = ({ navigation }) => {
+  const [showSnackBar, setShowSnackBar] = useState<boolean>(false);
+  const [listData, setListData] = useState<WishlistItem[]>(wishlistsData);
 
-const WishlistScreen = ({ navigation }) => {
-  const [showSnackBar, setShowSnackBar] = useState(false);
+  // Persist per-row animated values across renders
+  const rowTranslateAnimatedValues = useRef<Record<string, Animated.Value>>(
+    {},
+  ).current;
 
-  const [listData, setListData] = useState(wishlistsData);
-
-  Array(listData.length + 1)
-    .fill('')
-    .forEach((_, i) => {
-      rowTranslateAnimatedValues[`${i}`] = new Animated.Value(1);
+  // Ensure an Animated.Value exists for each current item key
+  useEffect(() => {
+    listData.forEach(item => {
+      if (!rowTranslateAnimatedValues[item.key]) {
+        rowTranslateAnimatedValues[item.key] = new Animated.Value(1);
+      }
     });
+  }, [listData, rowTranslateAnimatedValues]);
 
-  const animationIsRunning = useRef(false);
+  const animationIsRunning = useRef<boolean>(false);
 
-  const onSwipeValueChange = swipeData => {
+  const onSwipeValueChange = (swipeData: { key: string; value: number }) => {
     const { key, value } = swipeData;
 
     if ((value < -width || value > width) && !animationIsRunning.current) {
       animationIsRunning.current = true;
-      Animated.timing(rowTranslateAnimatedValues[key], {
+
+      const anim = rowTranslateAnimatedValues[key] ?? new Animated.Value(1);
+      rowTranslateAnimatedValues[key] = anim;
+
+      Animated.timing(anim, {
         toValue: 0,
         duration: 200,
-        useNativeDriver: false,
+        useNativeDriver: false, // height interpolation uses layout, so keep false
       }).start(() => {
-        const newData = [...listData];
         const prevIndex = listData.findIndex(item => item.key === key);
-        newData.splice(prevIndex, 1);
-        setListData(newData);
-        setShowSnackBar(true);
+        if (prevIndex !== -1) {
+          const newData = [...listData];
+          newData.splice(prevIndex, 1);
+          setListData(newData);
+          setShowSnackBar(true);
+        }
         animationIsRunning.current = false;
       });
     }
   };
 
-  function updateWishlist({ key }) {
-    const newList = listData.filter(product => product.key != key);
+  function updateWishlist({ key }: { key: string }) {
+    const newList = listData.filter(product => product.key !== key);
     setListData(newList);
     setShowSnackBar(true);
   }
 
-  const renderItem = data => (
-    <Animated.View
-      style={[
-        {
-          height: rowTranslateAnimatedValues[data.item.key].interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 170],
-          }),
-        },
-      ]}
-    >
-      <View style={{ flex: 1, backgroundColor: Colors.backColor }}>
-        <View style={styles.productWrapStyle}>
-          <Image
-            source={data.item.productImage}
-            style={styles.productImageStyle}
-          />
-          <View
-            style={{
-              marginVertical: Sizes.fixPadding,
-              marginLeft: Sizes.fixPadding,
-            }}
-          >
-            <Text
-              style={{
-                maxWidth: width - 150,
-                ...Fonts.blackColor15SemiBold,
-              }}
-            >
-              {data.item.productTitle}
-            </Text>
+  const renderItem = ({ item }: { item: WishlistItem }) => {
+    const anim = rowTranslateAnimatedValues[item.key] ?? new Animated.Value(1);
+    rowTranslateAnimatedValues[item.key] = anim;
+
+    return (
+      <Animated.View
+        style={[
+          {
+            height: anim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 170],
+            }),
+          },
+        ]}
+      >
+        <View style={{ flex: 1, backgroundColor: Colors.backColor }}>
+          <View style={styles.productWrapStyle}>
+            <Image
+              source={item.productImage}
+              style={styles.productImageStyle}
+            />
             <View
               style={{
-                marginVertical: Sizes.fixPadding - 2.0,
-                flexDirection: 'row',
-                alignItems: 'center',
+                marginVertical: Sizes.fixPadding,
+                marginLeft: Sizes.fixPadding,
               }}
             >
               <Text
                 style={{
-                  marginRight: Sizes.fixPadding,
-                  ...Fonts.lightGrayColor13Medium,
+                  maxWidth: width - 150,
+                  ...Fonts.blackColor15SemiBold,
                 }}
+                numberOfLines={2}
               >
-                Price:
+                {item.productTitle}
               </Text>
-              <Text style={{ ...Fonts.blueColor13SemiBold }}>
-                {`$`}
-                {data.item.productPrice}
-              </Text>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ ...Fonts.lightGrayColor13Medium }}>Size:</Text>
-              <Text
+
+              <View
                 style={{
-                  marginHorizontal: Sizes.fixPadding,
-                  ...Fonts.blueColor13SemiBold,
+                  marginVertical: Sizes.fixPadding - 2.0,
+                  flexDirection: 'row',
+                  alignItems: 'center',
                 }}
               >
-                {data.item.productSize}
-              </Text>
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={() => updateWishlist({ key: data.item.key })}
-                style={styles.removeButtonStyle}
-              >
-                <Text style={{ ...Fonts.whiteColor12SemiBold }}>Remove</Text>
-              </TouchableOpacity>
+                <Text
+                  style={{
+                    marginRight: Sizes.fixPadding,
+                    ...Fonts.lightGrayColor13Medium,
+                  }}
+                >
+                  Price:
+                </Text>
+                <Text style={{ ...Fonts.blueColor13SemiBold }}>
+                  {'$'}
+                  {item.productPrice}
+                </Text>
+              </View>
+
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{ ...Fonts.lightGrayColor13Medium }}>Size:</Text>
+                <Text
+                  style={{
+                    marginHorizontal: Sizes.fixPadding,
+                    ...Fonts.blueColor13SemiBold,
+                  }}
+                >
+                  {item.productSize}
+                </Text>
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  onPress={() => updateWishlist({ key: item.key })}
+                  style={styles.removeButtonStyle}
+                >
+                  <Text style={{ ...Fonts.whiteColor12SemiBold }}>Remove</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
-      </View>
-    </Animated.View>
-  );
+      </Animated.View>
+    );
+  };
 
-  const renderHiddenItem = () => <View style={styles.rowBack}></View>;
+  const renderHiddenItem = () => <View style={styles.rowBack} />;
 
   function wishlistEmptyInfo() {
     return (
@@ -181,37 +217,6 @@ const WishlistScreen = ({ navigation }) => {
     );
   }
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
-      <StatusBar backgroundColor={Colors.primaryColor} />
-      <View style={{ flex: 1 }}>
-        {header()}
-        <View style={{ flex: 1, backgroundColor: Colors.backColor }}>
-          {listData.length == 0 ? (
-            <>{wishlistEmptyInfo()}</>
-          ) : (
-            <SwipeListView
-              data={listData}
-              renderItem={renderItem}
-              renderHiddenItem={renderHiddenItem}
-              rightOpenValue={-width}
-              leftOpenValue={width}
-              onSwipeValueChange={onSwipeValueChange}
-              useNativeDriver={false}
-            />
-          )}
-          <Snackbar
-            style={styles.snackBarStyle}
-            visible={showSnackBar}
-            onDismiss={() => setShowSnackBar(false)}
-          >
-            <Text style={{ ...Fonts.whiteColor12Medium }}>Item Removed</Text>
-          </Snackbar>
-        </View>
-      </View>
-    </SafeAreaView>
-  );
-
   function header() {
     return (
       <View style={styles.headerWrapStyle}>
@@ -232,6 +237,39 @@ const WishlistScreen = ({ navigation }) => {
       </View>
     );
   }
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
+      <StatusBar backgroundColor={Colors.primaryColor} />
+      <View style={{ flex: 1 }}>
+        {header()}
+        <View style={{ flex: 1, backgroundColor: Colors.backColor }}>
+          {listData.length === 0 ? (
+            wishlistEmptyInfo()
+          ) : (
+            <SwipeListView
+              data={listData}
+              renderItem={renderItem}
+              renderHiddenItem={renderHiddenItem}
+              rightOpenValue={-width}
+              leftOpenValue={width}
+              onSwipeValueChange={onSwipeValueChange}
+              useNativeDriver={false}
+              keyExtractor={item => item.key}
+            />
+          )}
+
+          <Snackbar
+            style={styles.snackBarStyle}
+            visible={showSnackBar}
+            onDismiss={() => setShowSnackBar(false)}
+          >
+            <Text style={{ ...Fonts.whiteColor12Medium }}>Item Removed</Text>
+          </Snackbar>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({

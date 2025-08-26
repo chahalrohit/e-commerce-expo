@@ -1,5 +1,5 @@
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import React, { useState } from 'react';
+import React, { JSX, useState } from 'react';
 import {
   Image,
   SafeAreaView,
@@ -13,9 +13,76 @@ import {
 } from 'react-native';
 import { Colors, Fonts, Sizes } from '../../../constants/styles';
 
-const ResetPasswordScreen = ({ navigation }) => {
-  const [email, setEmail] = useState(null);
-  const [emailFocus, setEmailFocus] = useState(false);
+// Define the navigation prop type
+interface NavigationProps {
+  push: (screenName: string) => void;
+}
+
+interface ResetPasswordScreenProps {
+  navigation: NavigationProps;
+}
+
+const ResetPasswordScreen: React.FC<ResetPasswordScreenProps> = ({
+  navigation,
+}) => {
+  const [email, setEmail] = useState<string>('');
+  const [emailFocus, setEmailFocus] = useState<boolean>(false);
+
+  const appLogo = (): JSX.Element => {
+    return (
+      <Image
+        source={require('../../assets/images/logo/stylo_transparent.png')}
+        style={{ width: 80.0, height: 80.0, alignSelf: 'center' }}
+        resizeMode="contain"
+      />
+    );
+  };
+
+  const emailTextField = (): JSX.Element => {
+    return (
+      <View style={styles.textFieldWrapStyle}>
+        <MaterialIcons
+          name="email"
+          color={emailFocus ? Colors.primaryColor : Colors.grayColor}
+          size={24}
+        />
+        <TextInput
+          selectionColor={Colors.primaryColor}
+          placeholder="Enter Registered Email"
+          value={email}
+          onChangeText={(text: string) => setEmail(text)}
+          onFocus={() => setEmailFocus(true)}
+          onBlur={() => setEmailFocus(false)}
+          style={{
+            flex: 1,
+            marginLeft: Sizes.fixPadding,
+            ...Fonts.blackColor15Medium,
+          }}
+        />
+      </View>
+    );
+  };
+
+  const resetPasswordButton = (): JSX.Element => {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => navigation.push('Home')}
+        style={styles.resetPasswordButtonStyle}
+      >
+        <Text style={{ ...Fonts.whiteColor15Bold }}>RESET PASSWORD</Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const resetPasswordInfo = (): JSX.Element => {
+    return (
+      <View style={styles.resetPasswordInfoWrapStyle}>
+        {emailTextField()}
+        {resetPasswordButton()}
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
@@ -31,62 +98,6 @@ const ResetPasswordScreen = ({ navigation }) => {
       </View>
     </SafeAreaView>
   );
-
-  function resetPasswordInfo() {
-    return (
-      <View style={styles.resetPasswordInfoWrapStyle}>
-        {emailTextField()}
-        {resetPasswordButton()}
-      </View>
-    );
-  }
-
-  function resetPasswordButton() {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={() => navigation.push('Home')}
-        style={styles.resetPasswordButtonStyle}
-      >
-        <Text style={{ ...Fonts.whiteColor15Bold }}>RESET PASSWORD</Text>
-      </TouchableOpacity>
-    );
-  }
-
-  function emailTextField() {
-    return (
-      <View style={styles.textFieldWrapStyle}>
-        <MaterialIcons
-          name="email"
-          color={emailFocus ? Colors.primaryColor : Colors.grayColor}
-          size={24}
-        />
-        <TextInput
-          selectionColor={Colors.primaryColor}
-          placeholder="Enter Registered Email"
-          value={email}
-          onChangeText={text => setEmail(text)}
-          onFocus={() => setEmailFocus(true)}
-          onBlur={() => setEmailFocus(false)}
-          style={{
-            flex: 1,
-            marginLeft: Sizes.fixPadding,
-            ...Fonts.blackColor15Medium,
-          }}
-        />
-      </View>
-    );
-  }
-
-  function appLogo() {
-    return (
-      <Image
-        source={require('../../assets/images/logo/stylo_transparent.png')}
-        style={{ width: 80.0, height: 80.0, alignSelf: 'center' }}
-        resizeMode="contain"
-      />
-    );
-  }
 };
 
 const styles = StyleSheet.create({

@@ -1,6 +1,6 @@
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Dialog } from '@rneui/themed';
-import React, { useState } from 'react';
+import React, { JSX, useState } from 'react';
 import {
   Dimensions,
   SafeAreaView,
@@ -15,28 +15,28 @@ import { Colors, Fonts, Sizes } from '../../../constants/styles';
 
 const { width } = Dimensions.get('window');
 
-const AccountSettingScreen = ({ navigation }) => {
-  const [logoutDialog, setLogoutDialog] = useState(false);
+interface NavigationProps {
+  pop: () => void;
+  push: (screen: string) => void;
+}
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
-      <StatusBar backgroundColor={Colors.primaryColor} />
-      <View style={{ flex: 1 }}>
-        {header()}
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {accountInfo()}
-          {settingInfo()}
-          {logoutText()}
-        </ScrollView>
-      </View>
-      {logoutInfo()}
-    </SafeAreaView>
-  );
+interface AccountSettingScreenProps {
+  navigation: NavigationProps;
+}
 
-  function logoutInfo() {
+interface InformationShortProps {
+  title: string;
+}
+
+const AccountSettingScreen: React.FC<AccountSettingScreenProps> = ({
+  navigation,
+}) => {
+  const [logoutDialog, setLogoutDialog] = useState<boolean>(false);
+
+  const logoutInfo = (): JSX.Element => {
     return (
       <Dialog
-        visible={logoutDialog}
+        isVisible={logoutDialog}
         onRequestClose={() => {
           setLogoutDialog(false);
         }}
@@ -75,9 +75,9 @@ const AccountSettingScreen = ({ navigation }) => {
         </View>
       </Dialog>
     );
-  }
+  };
 
-  function logoutText() {
+  const logoutText = (): JSX.Element => {
     return (
       <TouchableOpacity
         activeOpacity={0.9}
@@ -100,9 +100,9 @@ const AccountSettingScreen = ({ navigation }) => {
         </Text>
       </TouchableOpacity>
     );
-  }
+  };
 
-  function settingInfo() {
+  const settingInfo = (): JSX.Element => {
     return (
       <View style={styles.settingInfoWrapStyle}>
         <Text
@@ -120,9 +120,9 @@ const AccountSettingScreen = ({ navigation }) => {
         </View>
       </View>
     );
-  }
+  };
 
-  function accountInfo() {
+  const accountInfo = (): JSX.Element => {
     return (
       <View style={styles.accountInfoWrapStyle}>
         <Text
@@ -140,9 +140,9 @@ const AccountSettingScreen = ({ navigation }) => {
         </View>
       </View>
     );
-  }
+  };
 
-  function informationShort({ title }) {
+  const informationShort = ({ title }: InformationShortProps): JSX.Element => {
     return (
       <>
         <View
@@ -168,9 +168,9 @@ const AccountSettingScreen = ({ navigation }) => {
         />
       </>
     );
-  }
+  };
 
-  function header() {
+  const header = (): JSX.Element => {
     return (
       <View style={styles.headerWrapStyle}>
         <MaterialIcons
@@ -189,7 +189,22 @@ const AccountSettingScreen = ({ navigation }) => {
         </Text>
       </View>
     );
-  }
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
+      <StatusBar backgroundColor={Colors.primaryColor} />
+      <View style={{ flex: 1 }}>
+        {header()}
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {accountInfo()}
+          {settingInfo()}
+          {logoutText()}
+        </ScrollView>
+      </View>
+      {logoutInfo()}
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({

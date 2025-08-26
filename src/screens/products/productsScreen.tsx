@@ -13,6 +13,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  ImageSourcePropType,
+  ListRenderItemInfo,
 } from 'react-native';
 import { Bounce } from 'react-native-animated-spinkit';
 import { Colors, Fonts, Sizes } from '../../../constants/styles';
@@ -22,36 +24,57 @@ import WomenProductsList from '../../components/products/women_products';
 
 const { width, height } = Dimensions.get('window');
 
-const sortingCategoriesList = [
+/** Types */
+type SortCriterion =
+  | 'Popularity'
+  | 'Price -- Low to High'
+  | 'Price -- High to Low'
+  | 'Newest First';
+
+type CategoryKey = 'ALL' | 'MENS' | 'WOMENS';
+
+type CategoryItem = { id: string; productCategory: CategoryKey };
+
+type Product = {
+  uniqueId: string | number;
+  productImage: ImageSourcePropType;
+  productTitle: string;
+  price: string | number;
+  oldPrice?: string | number;
+  offer?: string | number;
+};
+
+type Props = {
+  navigation: {
+    pop: () => void;
+    push: (route: string, params?: any) => void;
+  };
+};
+
+/** Data */
+const sortingCategoriesList: SortCriterion[] = [
   'Popularity',
   'Price -- Low to High',
   'Price -- High to Low',
   'Newest First',
 ];
 
-const productCategoriesList = [
-  {
-    id: '1',
-    productCategory: 'ALL',
-  },
-  {
-    id: '2',
-    productCategory: 'MENS',
-  },
-  {
-    id: '3',
-    productCategory: 'WOMENS',
-  },
+const productCategoriesList: CategoryItem[] = [
+  { id: '1', productCategory: 'ALL' },
+  { id: '2', productCategory: 'MENS' },
+  { id: '3', productCategory: 'WOMENS' },
 ];
 
-const ProductsScreen = ({ navigation }) => {
-  const [getProducts, setGetProducts] = useState(false);
-  const [selectedProductCategory, setSelectedProductCategory] = useState(
-    productCategoriesList[0].productCategory,
+const ProductsScreen: React.FC<Props> = ({ navigation }) => {
+  const [getProducts, setGetProducts] = useState<boolean>(false);
+  const [selectedProductCategory, setSelectedProductCategory] =
+    useState<CategoryKey>(productCategoriesList[0].productCategory);
+  const [productsList, setProductsList] = useState<Product[]>(
+    AllProductsList as Product[]
   );
-  const [productsList, setProductsList] = useState(AllProductsList);
-  const [showSortBottomSheet, setShowSortBottomSheet] = useState(false);
-  const [currentSortingCriteria, setCurrentSortingCriteria] = useState(null);
+  const [showSortBottomSheet, setShowSortBottomSheet] = useState<boolean>(false);
+  const [currentSortingCriteria, setCurrentSortingCriteria] =
+    useState<SortCriterion | null>(null);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
@@ -60,6 +83,9 @@ const ProductsScreen = ({ navigation }) => {
         {header()}
         {getProducts ? (
           <FlatList
+            data={[] as any[]}
+            keyExtractor={(_, i) => String(i)}
+            renderItem={() => null}
             ListHeaderComponent={
               <>
                 {productsCategories()}
@@ -89,17 +115,15 @@ const ProductsScreen = ({ navigation }) => {
         }}
       >
         <TouchableWithoutFeedback onPress={() => setShowSortBottomSheet(false)}>
-          <View style={{ flex: 1, height: height }}>
+          <View style={{ flex: 1, height }}>
             <TouchableWithoutFeedback>
               <View style={styles.bottomSheetWrapStyle}>
-                <Text
-                  style={{ textAlign: 'center', ...Fonts.blackColor16Bold }}
-                >
+                <Text style={{ textAlign: 'center', ...Fonts.blackColor16Bold }}>
                   SORT BY
                 </Text>
                 <View style={styles.bottomSheetDividerStyle} />
                 {sortingCategoriesList.map((item, index) => (
-                  <View key={`${index}`}>
+                  <View key={String(index)}>
                     <TouchableOpacity
                       activeOpacity={0.9}
                       onPress={() => {
@@ -112,12 +136,12 @@ const ProductsScreen = ({ navigation }) => {
                         style={{
                           ...styles.radioButtonOuterStyle,
                           borderColor:
-                            currentSortingCriteria == item
+                            currentSortingCriteria === item
                               ? Colors.blueColor
                               : Colors.lightGrayColor,
                         }}
                       >
-                        {currentSortingCriteria == item ? (
+                        {currentSortingCriteria === item ? (
                           <View style={styles.radioButtonInnerStyle} />
                         ) : null}
                       </View>
@@ -141,14 +165,14 @@ const ProductsScreen = ({ navigation }) => {
   }
 
   function products() {
-    const renderItem = ({ item, index }) => {
+    const renderItem = ({ item, index }: ListRenderItemInfo<Product>) => {
       return (
         <TouchableOpacity
           activeOpacity={0.9}
           onPress={() => navigation.push('ProductDetail', { item })}
           style={{
-            borderLeftColor: index % 2 != 0 ? '#cccccc' : 'transparent',
-            borderRightColor: index % 2 == 0 ? '#cccccc' : 'transparent',
+            borderLeftColor: index % 2 !== 0 ? '#cccccc' : 'transparent',
+            borderRightColor: index % 2 === 0 ? '#cccccc' : 'transparent',
             ...styles.productsWrapStyle,
           }}
         >
@@ -165,7 +189,7 @@ const ProductsScreen = ({ navigation }) => {
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text style={{ ...Fonts.blackColor15Bold }}>
-              {`$`}
+              {'$'}
               {item.price}
             </Text>
             <Text
@@ -175,18 +199,21 @@ const ProductsScreen = ({ navigation }) => {
                 ...Fonts.lightGrayColor12Medium,
               }}
             >
-              {`$`}
+              {'$'}
               {item.oldPrice}
             </Text>
-            <Text style={{ ...Fonts.greenColor12Medium }}>({item.offer})</Text>
+            <Text style={{ ...Fonts.greenColor12Medium }}>
+              ({item.offer})
+            </Text>
           </View>
         </TouchableOpacity>
       );
     };
+
     return (
-      <FlatList
+      <FlatList<Product>
         data={productsList}
-        keyExtractor={item => `${item.uniqueId}`}
+        keyExtractor={(p) => String(p.uniqueId)}
         renderItem={renderItem}
         numColumns={2}
       />
@@ -222,7 +249,7 @@ const ProductsScreen = ({ navigation }) => {
               height: 20.0,
               backgroundColor: Colors.lightGrayColor,
             }}
-          ></View>
+          />
           <TouchableOpacity
             activeOpacity={0.9}
             onPress={() => navigation.push('Filter')}
@@ -249,6 +276,7 @@ const ProductsScreen = ({ navigation }) => {
   }
 
   function getProductsData() {
+    // Keep original behavior: trigger a delayed "loading" completion when this view is shown.
     setTimeout(() => {
       setGetProducts(true);
     }, 1500);
@@ -267,23 +295,23 @@ const ProductsScreen = ({ navigation }) => {
   }
 
   function productsCategories() {
-    const renderItem = ({ item }) => (
+    const renderItem = ({ item }: ListRenderItemInfo<CategoryItem>) => (
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() => {
           setGetProducts(false);
           setSelectedProductCategory(item.productCategory);
           setProductsList(
-            item.productCategory == 'MENS'
-              ? MenProductsList
-              : item.productCategory == 'WOMENS'
-              ? WomenProductsList
-              : AllProductsList,
+            item.productCategory === 'MENS'
+              ? (MenProductsList as Product[])
+              : item.productCategory === 'WOMENS'
+              ? (WomenProductsList as Product[])
+              : (AllProductsList as Product[])
           );
         }}
         style={{
           borderColor:
-            selectedProductCategory == item.productCategory
+            selectedProductCategory === item.productCategory
               ? Colors.primaryColor
               : Colors.lightGrayColor,
           ...styles.productCategoriesWrapStyle,
@@ -291,7 +319,7 @@ const ProductsScreen = ({ navigation }) => {
       >
         <Text
           style={
-            selectedProductCategory == item.productCategory
+            selectedProductCategory === item.productCategory
               ? { ...Fonts.primaryColor15SemiBold }
               : { ...Fonts.blackColor15Medium }
           }
@@ -300,12 +328,13 @@ const ProductsScreen = ({ navigation }) => {
         </Text>
       </TouchableOpacity>
     );
+
     return (
       <View>
-        <FlatList
+        <FlatList<CategoryItem>
           horizontal
           data={productCategoriesList}
-          keyExtractor={item => `${item.id}`}
+          keyExtractor={(c) => c.id}
           renderItem={renderItem}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
@@ -320,13 +349,7 @@ const ProductsScreen = ({ navigation }) => {
   function header() {
     return (
       <View style={styles.headerWrapStyle}>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            flex: 2.0,
-          }}
-        >
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 2.0 }}>
           <MaterialIcons
             name="arrow-back"
             size={25}
@@ -366,11 +389,7 @@ const ProductsScreen = ({ navigation }) => {
             activeOpacity={0.9}
             onPress={() => navigation.push('Bag')}
           >
-            <FontAwesome5
-              name="shopping-bag"
-              size={24}
-              color={Colors.blackColor}
-            />
+            <FontAwesome5 name="shopping-bag" size={24} color={Colors.blackColor} />
             <View style={styles.favoritsAndShoppingsCountStyle}>
               <Text style={{ ...Fonts.whiteColor12Medium }}>3</Text>
             </View>

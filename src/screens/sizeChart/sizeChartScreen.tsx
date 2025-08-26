@@ -1,5 +1,5 @@
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import React, { useState } from 'react';
+import React, { useState, FC } from 'react';
 import {
   Dimensions,
   Image,
@@ -10,31 +10,31 @@ import {
   Text,
   TouchableOpacity,
   View,
+  GestureResponderEvent,
 } from 'react-native';
 import { Colors, Fonts, Sizes } from '../../../constants/styles';
 
 const { width } = Dimensions.get('window');
 
-const SizeChartScreen = ({ navigation }) => {
-  const [selectedSizeTypeId, setSelectedSizeTypeId] = useState(1);
+type SizeRow = {
+  sizeType: string,
+  valueInInch: string,
+  valueInCm: string,
+};
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fafafa' }}>
-      <StatusBar backgroundColor={Colors.primaryColor} />
-      <View style={{ flex: 1 }}>
-        {header()}
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: Sizes.fixPadding + 5.0 }}
-        >
-          {selectSizeType()}
-          {divider()}
-          {sizes()}
-          {measureYourSelf()}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
-  );
+type SizeToggle = {
+  id: 1 | 2,
+  type: 'INCH' | 'CM',
+};
+
+type Props = {
+  navigation: {
+    pop: () => void,
+  },
+};
+
+const SizeChartScreen: FC<Props> = ({ navigation }) => {
+  const [selectedSizeTypeId, setSelectedSizeTypeId] = (useState < 1) | (2 > 1);
 
   function measureYourSelf() {
     return (
@@ -51,6 +51,7 @@ const SizeChartScreen = ({ navigation }) => {
         </Text>
         {divider()}
         <Image
+          // If TS complains about require, add: `// @ts-ignore` above or type your image module declarations.
           source={require('../../assets/images/size_charts.png')}
           style={styles.sizeChartImageStyle}
         />
@@ -115,7 +116,7 @@ const SizeChartScreen = ({ navigation }) => {
     );
   }
 
-  function sizesTypeWithValues({ sizeType, valueInInch, valueInCm }) {
+  function sizesTypeWithValues({ sizeType, valueInInch, valueInCm }: SizeRow) {
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={styles.sizesLeftBoxStyle}>
@@ -123,7 +124,7 @@ const SizeChartScreen = ({ navigation }) => {
         </View>
         <View style={styles.sizesRightBoxStyle}>
           <Text style={{ ...Fonts.blackColor15Medium }}>
-            {selectedSizeTypeId == 1 ? valueInInch : valueInCm}
+            {selectedSizeTypeId === 1 ? valueInInch : valueInCm}
           </Text>
         </View>
       </View>
@@ -139,22 +140,22 @@ const SizeChartScreen = ({ navigation }) => {
     );
   }
 
-  function sizeType({ id, type }) {
+  function sizeType({ id, type }: SizeToggle) {
+    const onPress = (_e?: GestureResponderEvent) => setSelectedSizeTypeId(id);
+    const isSelected = selectedSizeTypeId === id;
+
     return (
       <TouchableOpacity
         activeOpacity={0.9}
-        onPress={() => setSelectedSizeTypeId(id)}
+        onPress={onPress}
         style={{
-          borderColor:
-            selectedSizeTypeId == id
-              ? Colors.primaryColor
-              : Colors.lightGrayColor,
+          borderColor: isSelected ? Colors.primaryColor : Colors.lightGrayColor,
           ...styles.sizeTypeWrapStyle,
         }}
       >
         <Text
           style={
-            selectedSizeTypeId == id
+            isSelected
               ? { ...Fonts.primaryColor15SemiBold }
               : { ...Fonts.blackColor15Medium }
           }
@@ -185,6 +186,24 @@ const SizeChartScreen = ({ navigation }) => {
       </View>
     );
   }
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fafafa' }}>
+      <StatusBar backgroundColor={Colors.primaryColor} />
+      <View style={{ flex: 1 }}>
+        {header()}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: Sizes.fixPadding + 5.0 }}
+        >
+          {selectSizeType()}
+          {divider()}
+          {sizes()}
+          {measureYourSelf()}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({

@@ -1,5 +1,5 @@
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import React, { useState } from 'react';
+import React, { JSX, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -10,82 +10,67 @@ import {
   View,
 } from 'react-native';
 import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-const pricesList = [
-  {
-    id: '1',
-    isSelected: false,
-    discount: '$49 and below',
-  },
-  {
-    id: '2',
-    isSelected: false,
-    discount: '$50 to Rs.$99',
-  },
-  {
-    id: '3',
-    isSelected: false,
-    discount: '$100 and above',
-  },
+// ---------- TYPES ----------
+interface Price {
+  id: string;
+  isSelected: boolean;
+  discount: string;
+}
+
+interface Brand {
+  id: string;
+  isSelected: boolean;
+  brand: string;
+}
+
+interface Occasion {
+  id: string;
+  isSelected: boolean;
+  occasion: string;
+}
+
+type RootStackParamList = {
+  Filter: undefined;
+  // Add other screens here if you want
+};
+
+type FilterScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  'Filter'
+>;
+
+type FilterScreenProps = {
+  navigation: FilterScreenNavigationProp;
+};
+
+// ---------- DATA ----------
+const pricesList: Price[] = [
+  { id: '1', isSelected: false, discount: '$49 and below' },
+  { id: '2', isSelected: false, discount: '$50 to $99' },
+  { id: '3', isSelected: false, discount: '$100 and above' },
 ];
 
-const brandsList = [
-  {
-    id: '1',
-    isSelected: false,
-    brand: 'Calvin Klein',
-  },
-  {
-    id: '2',
-    isSelected: false,
-    brand: 'Nike',
-  },
-  {
-    id: '3',
-    isSelected: false,
-    brand: 'Puma',
-  },
+const brandsList: Brand[] = [
+  { id: '1', isSelected: false, brand: 'Calvin Klein' },
+  { id: '2', isSelected: false, brand: 'Nike' },
+  { id: '3', isSelected: false, brand: 'Puma' },
 ];
 
-const occasionList = [
-  {
-    id: '1',
-    occasion: 'Casual',
-    isSelected: false,
-  },
-  {
-    id: '2',
-    occasion: 'Party & Festive',
-    isSelected: false,
-  },
-  {
-    id: '3',
-    occasion: 'Wedding',
-    isSelected: false,
-  },
+const occasionList: Occasion[] = [
+  { id: '1', isSelected: false, occasion: 'Casual' },
+  { id: '2', isSelected: false, occasion: 'Party & Festive' },
+  { id: '3', isSelected: false, occasion: 'Wedding' },
 ];
 
-const FilterScreen = ({ navigation }) => {
-  const [prices, setPrices] = useState(pricesList);
-  const [brands, setBrands] = useState(brandsList);
-  const [occasions, setOccasions] = useState(occasionList);
+// ---------- COMPONENT ----------
+const FilterScreen: React.FC<FilterScreenProps> = ({ navigation }) => {
+  const [prices, setPrices] = useState<Price[]>(pricesList);
+  const [brands, setBrands] = useState<Brand[]>(brandsList);
+  const [occasions, setOccasions] = useState<Occasion[]>(occasionList);
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
-      <StatusBar backgroundColor={Colors.primaryColor} />
-      <View style={{ flex: 1 }}>
-        {header()}
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {priceInfo()}
-          {brandInfo()}
-          {occasionInfo()}
-        </ScrollView>
-        {cancelAndApplyButton()}
-      </View>
-    </SafeAreaView>
-  );
-
-  function cancelAndApplyButton() {
+  const cancelAndApplyButton = (): JSX.Element => {
     return (
       <View style={styles.cancelAndApplyButtonWrapStyle}>
         <TouchableOpacity
@@ -110,9 +95,9 @@ const FilterScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
     );
-  }
+  };
 
-  function occasionInfo() {
+  const occasionInfo = (): JSX.Element => {
     return (
       <View>
         {divider()}
@@ -127,18 +112,16 @@ const FilterScreen = ({ navigation }) => {
         </Text>
         {divider()}
         {occasions.map((item, index) => (
-          <View key={`${item.id}`}>
+          <View key={item.id}>
             <View
               style={{
-                marginTop: index == 0 ? Sizes.fixPadding + 5.0 : 0.0,
+                marginTop: index === 0 ? Sizes.fixPadding + 5.0 : 0.0,
                 ...styles.chackBoxWithTextWrapStyle,
               }}
             >
               <TouchableOpacity
                 activeOpacity={0.9}
-                onPress={() => {
-                  toggleOccasionCheck({ id: item.id });
-                }}
+                onPress={() => toggleOccasionCheck({ id: item.id })}
                 style={{
                   ...styles.checkBoxStyle,
                   backgroundColor: item.isSelected
@@ -149,13 +132,13 @@ const FilterScreen = ({ navigation }) => {
                     : Colors.lightGrayColor,
                 }}
               >
-                {item.isSelected ? (
+                {item.isSelected && (
                   <MaterialIcons
                     name="check"
                     size={15}
                     color={Colors.whiteColor}
                   />
-                ) : null}
+                )}
               </TouchableOpacity>
               <Text
                 style={{
@@ -170,9 +153,9 @@ const FilterScreen = ({ navigation }) => {
         ))}
       </View>
     );
-  }
+  };
 
-  function brandInfo() {
+  const brandInfo = (): JSX.Element => {
     return (
       <View>
         {divider()}
@@ -187,18 +170,16 @@ const FilterScreen = ({ navigation }) => {
         </Text>
         {divider()}
         {brands.map((item, index) => (
-          <View key={`${item.id}`}>
+          <View key={item.id}>
             <View
               style={{
-                marginTop: index == 0 ? Sizes.fixPadding + 5.0 : 0.0,
+                marginTop: index === 0 ? Sizes.fixPadding + 5.0 : 0.0,
                 ...styles.chackBoxWithTextWrapStyle,
               }}
             >
               <TouchableOpacity
                 activeOpacity={0.9}
-                onPress={() => {
-                  toggleBrandCheck({ id: item.id });
-                }}
+                onPress={() => toggleBrandCheck({ id: item.id })}
                 style={{
                   ...styles.checkBoxStyle,
                   backgroundColor: item.isSelected
@@ -209,13 +190,13 @@ const FilterScreen = ({ navigation }) => {
                     : Colors.lightGrayColor,
                 }}
               >
-                {item.isSelected ? (
+                {item.isSelected && (
                   <MaterialIcons
                     name="check"
                     size={15}
                     color={Colors.whiteColor}
                   />
-                ) : null}
+                )}
               </TouchableOpacity>
               <Text
                 style={{
@@ -230,9 +211,9 @@ const FilterScreen = ({ navigation }) => {
         ))}
       </View>
     );
-  }
+  };
 
-  function priceInfo() {
+  const priceInfo = (): JSX.Element => {
     return (
       <View>
         <Text
@@ -246,18 +227,16 @@ const FilterScreen = ({ navigation }) => {
         </Text>
         {divider()}
         {prices.map((item, index) => (
-          <View key={`${item.id}`}>
+          <View key={item.id}>
             <View
               style={{
-                marginTop: index == 0 ? Sizes.fixPadding + 5.0 : 0.0,
+                marginTop: index === 0 ? Sizes.fixPadding + 5.0 : 0.0,
                 ...styles.chackBoxWithTextWrapStyle,
               }}
             >
               <TouchableOpacity
                 activeOpacity={0.9}
-                onPress={() => {
-                  togglePricesCheck({ id: item.id });
-                }}
+                onPress={() => togglePricesCheck({ id: item.id })}
                 style={{
                   ...styles.checkBoxStyle,
                   backgroundColor: item.isSelected
@@ -268,13 +247,13 @@ const FilterScreen = ({ navigation }) => {
                     : Colors.lightGrayColor,
                 }}
               >
-                {item.isSelected ? (
+                {item.isSelected && (
                   <MaterialIcons
                     name="check"
                     size={15}
                     color={Colors.whiteColor}
                   />
-                ) : null}
+                )}
               </TouchableOpacity>
               <Text
                 style={{
@@ -289,42 +268,33 @@ const FilterScreen = ({ navigation }) => {
         ))}
       </View>
     );
-  }
+  };
 
-  function toggleOccasionCheck({ id }) {
-    const newList = occasions.map(item => {
-      if (item.id === id) {
-        const updatedItem = { ...item, isSelected: !item.isSelected };
-        return updatedItem;
-      }
-      return item;
-    });
-    setOccasions(newList);
-  }
+  const toggleOccasionCheck = ({ id }: { id: string }) => {
+    setOccasions(prev =>
+      prev.map(item =>
+        item.id === id ? { ...item, isSelected: !item.isSelected } : item,
+      ),
+    );
+  };
 
-  function toggleBrandCheck({ id }) {
-    const newList = brands.map(brand => {
-      if (brand.id === id) {
-        const updatedItem = { ...brand, isSelected: !brand.isSelected };
-        return updatedItem;
-      }
-      return brand;
-    });
-    setBrands(newList);
-  }
+  const toggleBrandCheck = ({ id }: { id: string }) => {
+    setBrands(prev =>
+      prev.map(item =>
+        item.id === id ? { ...item, isSelected: !item.isSelected } : item,
+      ),
+    );
+  };
 
-  function togglePricesCheck({ id }) {
-    const newList = prices.map(discount => {
-      if (discount.id === id) {
-        const updatedItem = { ...discount, isSelected: !discount.isSelected };
-        return updatedItem;
-      }
-      return discount;
-    });
-    setPrices(newList);
-  }
+  const togglePricesCheck = ({ id }: { id: string }) => {
+    setPrices(prev =>
+      prev.map(item =>
+        item.id === id ? { ...item, isSelected: !item.isSelected } : item,
+      ),
+    );
+  };
 
-  function divider() {
+  const divider = (): JSX.Element => {
     return (
       <View
         style={{
@@ -334,9 +304,9 @@ const FilterScreen = ({ navigation }) => {
         }}
       />
     );
-  }
+  };
 
-  function header() {
+  const header = (): JSX.Element => {
     return (
       <View style={styles.headerWrapStyle}>
         <MaterialIcons
@@ -355,9 +325,25 @@ const FilterScreen = ({ navigation }) => {
         </Text>
       </View>
     );
-  }
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
+      <StatusBar backgroundColor={Colors.primaryColor} />
+      <View style={{ flex: 1 }}>
+        {header()}
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {priceInfo()}
+          {brandInfo()}
+          {occasionInfo()}
+        </ScrollView>
+        {cancelAndApplyButton()}
+      </View>
+    </SafeAreaView>
+  );
 };
 
+// ---------- STYLES ----------
 const styles = StyleSheet.create({
   headerWrapStyle: {
     flexDirection: 'row',

@@ -11,26 +11,22 @@ import {
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-const DeliveryScreen = ({ navigation }) => {
-  const [pincode, setPincode] = useState('');
-  const [locality, setLocality] = useState('');
-  const [city, setCity] = useState('');
-  const [stateValue, setStateValue] = useState('');
+type RootStackParamList = {
+  Delivery: undefined;
+  Payment: undefined;
+};
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
-      <StatusBar backgroundColor={Colors.primaryColor} />
-      <View style={{ flex: 1 }}>
-        {header()}
-        <ScrollView showsHorizontalScrollIndicator={false}>
-          {title()}
-          {addressInfo()}
-          {gotoPaymentButton()}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
-  );
+type DeliveryScreenProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Delivery'>;
+};
+
+const DeliveryScreen: React.FC<DeliveryScreenProps> = ({ navigation }) => {
+  const [pincode, setPincode] = useState<string>('');
+  const [locality, setLocality] = useState<string>('');
+  const [city, setCity] = useState<string>('');
+  const [stateValue, setStateValue] = useState<string>('');
 
   function gotoPaymentButton() {
     return (
@@ -61,7 +57,7 @@ const DeliveryScreen = ({ navigation }) => {
         mode="flat"
         label="State"
         value={stateValue}
-        onChangeText={text => setStateValue(text)}
+        onChangeText={(text: string) => setStateValue(text)}
         style={styles.textFieldStyle}
         theme={{
           colors: {
@@ -80,7 +76,7 @@ const DeliveryScreen = ({ navigation }) => {
         mode="flat"
         label="City"
         value={city}
-        onChangeText={text => setCity(text)}
+        onChangeText={(text: string) => setCity(text)}
         style={styles.textFieldStyle}
         theme={{
           colors: {
@@ -99,7 +95,7 @@ const DeliveryScreen = ({ navigation }) => {
         mode="flat"
         label="Locality"
         value={locality}
-        onChangeText={text => setLocality(text)}
+        onChangeText={(text: string) => setLocality(text)}
         style={styles.textFieldStyle}
         theme={{
           colors: {
@@ -119,7 +115,7 @@ const DeliveryScreen = ({ navigation }) => {
         label="Pin Code"
         keyboardType="numeric"
         value={pincode}
-        onChangeText={text => setPincode(text)}
+        onChangeText={(text: string) => setPincode(text)}
         style={styles.textFieldStyle}
         theme={{
           colors: {
@@ -166,6 +162,20 @@ const DeliveryScreen = ({ navigation }) => {
       </View>
     );
   }
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
+      <StatusBar backgroundColor={Colors.primaryColor} />
+      <View style={{ flex: 1 }}>
+        {header()}
+        <ScrollView showsHorizontalScrollIndicator={false}>
+          {title()}
+          {addressInfo()}
+          {gotoPaymentButton()}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({

@@ -1,7 +1,7 @@
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Dialog } from '@rneui/themed';
-import React, { useState } from 'react';
+import React, { JSX, useState } from 'react';
 import {
   Dimensions,
   Image,
@@ -18,27 +18,25 @@ import { Colors, Fonts, Sizes } from '../../../constants/styles';
 
 const { width } = Dimensions.get('window');
 
-const AccountScreen = ({ navigation }) => {
-  const [logoutDialog, setLogoutDialog] = useState(false);
+interface AccountScreenProps {
+  navigation: {
+    pop: () => void;
+    push: (screenName: string) => void;
+  };
+}
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
-      <StatusBar backgroundColor={Colors.primaryColor} />
-      <View style={{ flex: 1 }}>
-        {header()}
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {profilePic()}
-          {accountOptions()}
-        </ScrollView>
-      </View>
-      {logoutInfo()}
-    </SafeAreaView>
-  );
+interface OptionsShortProps {
+  icon: React.ReactNode;
+  title: string;
+}
 
-  function logoutInfo() {
+const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
+  const [logoutDialog, setLogoutDialog] = useState<boolean>(false);
+
+  const logoutInfo = (): JSX.Element => {
     return (
       <Dialog
-        visible={logoutDialog}
+        isVisible={logoutDialog}
         onRequestClose={() => {
           setLogoutDialog(false);
         }}
@@ -77,9 +75,9 @@ const AccountScreen = ({ navigation }) => {
         </View>
       </Dialog>
     );
-  }
+  };
 
-  function accountOptions() {
+  const accountOptions = (): JSX.Element => {
     return (
       <View style={{ marginTop: Sizes.fixPadding * 13.0 }}>
         <TouchableOpacity
@@ -178,9 +176,9 @@ const AccountScreen = ({ navigation }) => {
         {divider()}
       </View>
     );
-  }
+  };
 
-  function optionsShort({ icon, title }) {
+  const optionsShort = ({ icon, title }: OptionsShortProps): JSX.Element => {
     return (
       <View
         style={{
@@ -200,9 +198,9 @@ const AccountScreen = ({ navigation }) => {
         </Text>
       </View>
     );
-  }
+  };
 
-  function divider() {
+  const divider = (): JSX.Element => {
     return (
       <View
         style={{
@@ -214,9 +212,9 @@ const AccountScreen = ({ navigation }) => {
         }}
       />
     );
-  }
+  };
 
-  function profilePic() {
+  const profilePic = (): JSX.Element => {
     return (
       <ImageBackground
         source={require('../../assets/images/user_profile/background.jpg')}
@@ -254,9 +252,9 @@ const AccountScreen = ({ navigation }) => {
         </View>
       </ImageBackground>
     );
-  }
+  };
 
-  function header() {
+  const header = (): JSX.Element => {
     return (
       <View style={styles.headerWrapStyle}>
         <MaterialIcons
@@ -275,7 +273,21 @@ const AccountScreen = ({ navigation }) => {
         </Text>
       </View>
     );
-  }
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
+      <StatusBar backgroundColor={Colors.primaryColor} />
+      <View style={{ flex: 1 }}>
+        {header()}
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {profilePic()}
+          {accountOptions()}
+        </ScrollView>
+      </View>
+      {logoutInfo()}
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({

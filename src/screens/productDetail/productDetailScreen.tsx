@@ -15,6 +15,8 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   View,
+  ImageSourcePropType,
+  ListRenderItemInfo,
 } from 'react-native';
 import { Snackbar } from 'react-native-paper';
 import Carousel, { Pagination } from 'react-native-snap-carousel-v4';
@@ -23,44 +25,68 @@ import AllProductsList from '../../components/products/products';
 
 const { width, height } = Dimensions.get('window');
 
-const ProductDetailScreen = ({ route, navigation }) => {
+/** Types */
+type Product = {
+  uniqueId?: string;
+  productImage: ImageSourcePropType;
+  productTitle: string;
+  price: string | number;
+  oldPrice?: string | number;
+  offer?: string | number;
+};
+
+type RouteLike = {
+  params: { item: Product };
+};
+
+type NavigationLike = {
+  pop: () => void;
+  push: (route: string) => void;
+};
+
+type Props = {
+  route: RouteLike;
+  navigation: NavigationLike;
+};
+
+type ProductImageItem = { productImage: ImageSourcePropType };
+
+const ProductDetailScreen: React.FC<Props> = ({ route, navigation }) => {
   const item = route.params.item;
 
-  let description =
+  const description =
     "Slip into this trendy and attractive dress from Rudraaksha and look stylish effortlessly. Made to accentuate any body type, it will give you that extra oomph and make you stand out wherever you are. Keep the accessories minimal for that added elegant look, just your favorite heels and dangling earrings, and of course, don't forget your pretty smile!";
 
-  const [productImages, setProductImages] = useState([
-    {
-      productImage: item.productImage,
-    },
-    {
-      productImage: item.productImage,
-    },
-    {
-      productImage: item.productImage,
-    },
-    {
-      productImage: item.productImage,
-    },
-    {
-      productImage: item.productImage,
-    },
+  const [productImages] = useState<ProductImageItem[]>([
+    { productImage: item.productImage },
+    { productImage: item.productImage },
+    { productImage: item.productImage },
+    { productImage: item.productImage },
+    { productImage: item.productImage },
   ]);
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [selectedProductSize, setSelectedProductSize] = useState(null);
-  const [selectedProductColor, setSelectedProductColor] = useState(null);
+  const [activeSlide, setActiveSlide] = useState<number>(0);
+  const [selectedProductSize, setSelectedProductSize] = useState<string | null>(
+    null,
+  );
+  const [selectedProductColor, setSelectedProductColor] = useState<
+    string | null
+  >(null);
   const [showProductDescriptionSheet, setShowProductDescriptionSheet] =
-    useState(false);
-  const [isInFavorite, setIsInFavorite] = useState(false);
-  const [showSnackBar, setShowSnackBar] = useState(false);
-  const [bagItemCount, setBagItemCount] = useState(3);
+    useState<boolean>(false);
+  const [isInFavorite, setIsInFavorite] = useState<boolean>(false);
+  const [showSnackBar, setShowSnackBar] = useState<boolean>(false);
+  const [bagItemCount, setBagItemCount] = useState<number>(3);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
       <StatusBar backgroundColor={Colors.primaryColor} />
       <View style={{ flex: 1 }}>
         {header()}
+        {/* Using FlatList as a scroll container */}
         <FlatList
+          data={[] as any[]}
+          keyExtractor={(_, i) => String(i)}
+          renderItem={() => null}
           ListHeaderComponent={
             <>
               {productImagesSlider()}
@@ -89,7 +115,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
         visible={showSnackBar}
         onDismiss={() => setShowSnackBar(false)}
       >
-        {isInFavorite ? `Added to Wishlist` : `Remove from Wishlist`}
+        {isInFavorite ? 'Added to Wishlist' : 'Remove from Wishlist'}
       </Snackbar>
     );
   }
@@ -162,7 +188,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
   }
 
   function similarProductInfo() {
-    const renderItem = ({ item }) => (
+    const renderItem = ({ item }: ListRenderItemInfo<Product>) => (
       <View
         style={{
           borderColor: '#e0e0e0',
@@ -183,7 +209,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={{ ...Fonts.blackColor15SemiBold }}>
-            {`$`}
+            {'$'}
             {item.price}
           </Text>
           <Text
@@ -193,7 +219,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
               ...Fonts.lightGrayColor12Medium,
             }}
           >
-            {`$`}
+            {'$'}
             {item.oldPrice}
           </Text>
         </View>
@@ -216,11 +242,11 @@ const ProductDetailScreen = ({ route, navigation }) => {
         >
           SIMILAR PRODUCTS
         </Text>
-        <FlatList
+        <FlatList<Product>
           horizontal
           showsHorizontalScrollIndicator={false}
-          data={AllProductsList}
-          keyExtractor={item => `${item.uniqueId}`}
+          data={AllProductsList as Product[]}
+          keyExtractor={p => `${p.uniqueId ?? p.productTitle}`}
           renderItem={renderItem}
         />
       </View>
@@ -270,12 +296,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
             View More
           </Text>
         </TouchableOpacity>
-        <View
-          style={{
-            backgroundColor: '#ececec',
-            height: 1.0,
-          }}
-        />
+        <View style={{ backgroundColor: '#ececec', height: 1.0 }} />
       </View>
     );
   }
@@ -291,27 +312,21 @@ const ProductDetailScreen = ({ route, navigation }) => {
         >
           PRODUCT DETAILS
         </Text>
-        {productDetailShort({
-          title: 'Color',
-          value: 'Yellow',
-        })}
-        {productDetailShort({
-          title: 'Length',
-          value: 'Knee Length',
-        })}
-        {productDetailShort({
-          title: 'Type',
-          value: 'Bandage',
-        })}
-        {productDetailShort({
-          title: 'Sleeve',
-          value: 'Cap Sleeve',
-        })}
+        {productDetailShort({ title: 'Color', value: 'Yellow' })}
+        {productDetailShort({ title: 'Length', value: 'Knee Length' })}
+        {productDetailShort({ title: 'Type', value: 'Bandage' })}
+        {productDetailShort({ title: 'Sleeve', value: 'Cap Sleeve' })}
       </View>
     );
   }
 
-  function productDetailShort({ title, value }) {
+  function productDetailShort({
+    title,
+    value,
+  }: {
+    title: string;
+    value: string;
+  }) {
     return (
       <View
         style={{
@@ -366,12 +381,14 @@ const ProductDetailScreen = ({ route, navigation }) => {
         >
           Tip:For the best fit,buy one size larger than your usual size.
         </Text>
+
         <View style={styles.productSizesInfoWrapStyle}>
           {productSize({ size: 'XS' })}
           {productSize({ size: 'S' })}
           {productSize({ size: 'M' })}
           {productSize({ size: 'L' })}
         </View>
+
         <View
           style={{
             backgroundColor: '#ececec',
@@ -379,6 +396,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
             marginVertical: Sizes.fixPadding,
           }}
         />
+
         <Text style={{ ...Fonts.blackColor17SemiBold }}>COLOR</Text>
         <View
           style={{
@@ -387,15 +405,16 @@ const ProductDetailScreen = ({ route, navigation }) => {
             justifyContent: 'space-evenly',
           }}
         >
-          {productColor({ color: Colors.blackColor })}
-          {productColor({ color: Colors.primaryColor })}
-          {productColor({ color: Colors.blueColor })}
+          {productColor({ color: Colors.blackColor as string })}
+          {productColor({ color: Colors.primaryColor as string })}
+          {productColor({ color: Colors.blueColor as string })}
         </View>
       </View>
     );
   }
 
-  function productColor({ color }) {
+  function productColor({ color }: { color: string }) {
+    const selected = selectedProductColor === color;
     return (
       <TouchableOpacity
         activeOpacity={0.9}
@@ -403,34 +422,31 @@ const ProductDetailScreen = ({ route, navigation }) => {
         style={{
           ...styles.productColorWrapStyle,
           backgroundColor: color,
-          borderColor:
-            selectedProductColor == color ? Colors.primaryColor : 'transparent',
+          borderColor: selected ? Colors.primaryColor : 'transparent',
         }}
       >
-        {selectedProductColor == color ? (
+        {selected ? (
           <MaterialIcons name="check" color={Colors.whiteColor} size={26} />
         ) : null}
       </TouchableOpacity>
     );
   }
 
-  function productSize({ size }) {
+  function productSize({ size }: { size: string }) {
+    const selected = selectedProductSize === size;
     return (
       <TouchableOpacity
         activeOpacity={0.9}
         onPress={() => setSelectedProductSize(size)}
         style={{
-          backgroundColor:
-            selectedProductSize == size
-              ? Colors.primaryColor
-              : Colors.whiteColor,
+          backgroundColor: selected ? Colors.primaryColor : Colors.whiteColor,
           borderColor: '#e0e0e0',
           ...styles.sizesWrapStyle,
         }}
       >
         <Text
           style={
-            selectedProductSize == size
+            selected
               ? { ...Fonts.whiteColor13Bold }
               : { ...Fonts.blackColor13Bold }
           }
@@ -472,7 +488,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Text style={{ ...Fonts.blackColor17SemiBold }}>
-            {`$`}
+            {'$'}
             {item.price}
           </Text>
           <Text
@@ -482,7 +498,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
               ...Fonts.lightGrayColor14Medium,
             }}
           >
-            {`$`}
+            {'$'}
             {item.oldPrice}
           </Text>
           <Text style={{ ...Fonts.primaryColor14Medium }}>₹{item.offer}</Text>
@@ -516,22 +532,14 @@ const ProductDetailScreen = ({ route, navigation }) => {
     );
   }
 
-  function _renderItem({ item, index }) {
+  function _renderItem({ item }: { item: ProductImageItem; index: number }) {
     return (
       <View
-        style={{
-          backgroundColor: Colors.whiteColor,
-          width: width,
-          height: 410.0,
-        }}
+        style={{ backgroundColor: Colors.whiteColor, width, height: 410.0 }}
       >
         <ImageBackground
           source={item.productImage}
-          style={{
-            width: width - 100,
-            height: 410.0,
-            alignSelf: 'center',
-          }}
+          style={{ width: width - 100, height: 410.0, alignSelf: 'center' }}
           resizeMode="cover"
         >
           <LinearGradient
@@ -545,12 +553,8 @@ const ProductDetailScreen = ({ route, navigation }) => {
               'transparent',
               'rgba(255,255,255,0.99)',
             ]}
-            style={{
-              width: width - 100,
-              height: 410.0,
-              alignSelf: 'center',
-            }}
-          ></LinearGradient>
+            style={{ width: width - 100, height: 410.0, alignSelf: 'center' }}
+          />
         </ImageBackground>
       </View>
     );
@@ -559,15 +563,15 @@ const ProductDetailScreen = ({ route, navigation }) => {
   function productImagesSlider() {
     return (
       <View>
-        <Carousel
+        <Carousel<ProductImageItem>
           data={productImages}
           sliderWidth={width}
-          autoplay={true}
-          loop={true}
+          autoplay
+          loop
           autoplayInterval={4000}
           itemWidth={width}
           renderItem={_renderItem}
-          onSnapToItem={index => setActiveSlide(index)}
+          onSnapToItem={(i: number) => setActiveSlide(i)}
         />
         {pagination()}
         <TouchableOpacity
@@ -575,9 +579,7 @@ const ProductDetailScreen = ({ route, navigation }) => {
           onPress={() => {
             setIsInFavorite(!isInFavorite);
             setShowSnackBar(true);
-            setTimeout(() => {
-              setShowSnackBar(false);
-            }, 3000);
+            setTimeout(() => setShowSnackBar(false), 3000);
           }}
           style={styles.favoriteIconWrapStyle}
         >

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { JSX, useState } from 'react';
 import {
   Image,
   SafeAreaView,
@@ -13,12 +13,137 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Colors, Fonts, Sizes } from '../../../constants/styles';
 
-const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState(null);
-  const [emailFocus, setEmailFocus] = useState(false);
-  const [password, setPassword] = useState(null);
-  const [passwordFocus, setPasswordFocus] = useState(false);
-  const [backClickCount, setBackClickCount] = useState(0);
+interface NavigationProps {
+  navigate: (screen: string) => void;
+  push: (screen: string) => void;
+}
+
+interface LoginScreenProps {
+  navigation: NavigationProps;
+}
+
+const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
+  const [email, setEmail] = useState<string>('');
+  const [emailFocus, setEmailFocus] = useState<boolean>(false);
+  const [password, setPassword] = useState<string>('');
+  const [passwordFocus, setPasswordFocus] = useState<boolean>(false);
+  const [backClickCount, setBackClickCount] = useState<number>(0);
+
+  const loginInfo = (): JSX.Element => {
+    return (
+      <View style={styles.loginInfoWrapStyle}>
+        {emailTextField()}
+        {passwordTextField()}
+        {forgotPasswordText()}
+        {loginButton()}
+        {createAccountText()}
+      </View>
+    );
+  };
+
+  const createAccountText = (): JSX.Element => {
+    return (
+      <Text
+        onPress={() => navigation.navigate('CreateAccount')}
+        style={{
+          marginBottom: Sizes.fixPadding,
+          textAlign: 'center',
+          ...Fonts.blackColor16Bold,
+        }}
+      >
+        CREATE ACCOUNT
+      </Text>
+    );
+  };
+
+  const forgotPasswordText = (): JSX.Element => {
+    return (
+      <Text
+        onPress={() => navigation.push('ResetPassword')}
+        style={{
+          marginTop: Sizes.fixPadding * 2.0,
+          textAlign: 'center',
+          ...Fonts.blackColor16Bold,
+        }}
+      >
+        FORGOT PASSWORD?
+      </Text>
+    );
+  };
+
+  const loginButton = (): JSX.Element => {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => navigation.push('CreateAccount')}
+        style={styles.loginButtonStyle}
+      >
+        <Text style={{ ...Fonts.whiteColor15Bold }}>LOGIN</Text>
+      </TouchableOpacity>
+    );
+  };
+
+  const passwordTextField = (): JSX.Element => {
+    return (
+      <View style={styles.textFieldWrapStyle}>
+        <MaterialIcons
+          name="vpn-key"
+          color={passwordFocus ? Colors.primaryColor : Colors.grayColor}
+          size={24}
+        />
+        <TextInput
+          secureTextEntry={true}
+          selectionColor={Colors.primaryColor}
+          placeholder="Password"
+          value={password}
+          onChangeText={(text: string) => setPassword(text)}
+          onFocus={() => setPasswordFocus(true)}
+          onBlur={() => setPasswordFocus(false)}
+          style={{
+            flex: 1,
+            marginLeft: Sizes.fixPadding,
+            ...Fonts.blackColor15Medium,
+          }}
+        />
+      </View>
+    );
+  };
+
+  const emailTextField = (): JSX.Element => {
+    return (
+      <View style={styles.textFieldWrapStyle}>
+        <MaterialIcons
+          name="email"
+          color={emailFocus ? Colors.primaryColor : Colors.grayColor}
+          size={24}
+        />
+        <TextInput
+          selectionColor={Colors.primaryColor}
+          placeholder="Email"
+          value={email}
+          onChangeText={(text: string) => setEmail(text)}
+          onFocus={() => setEmailFocus(true)}
+          onBlur={() => setEmailFocus(false)}
+          style={{
+            flex: 1,
+            marginLeft: Sizes.fixPadding,
+            ...Fonts.blackColor15Medium,
+          }}
+          keyboardType="email-address"
+        />
+      </View>
+    );
+  };
+
+  const appLogo = (): JSX.Element => {
+    return (
+      <Image
+        source={require('../../assets/images/logo/stylo_transparent.png')}
+        style={{ width: 80.0, height: 80.0, alignSelf: 'center' }}
+        resizeMode="contain"
+      />
+    );
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
@@ -32,7 +157,7 @@ const LoginScreen = ({ navigation }) => {
           {loginInfo()}
         </ScrollView>
       </View>
-      {backClickCount == 1 ? (
+      {backClickCount === 1 ? (
         <View style={[styles.animatedView]}>
           <Text style={{ ...Fonts.whiteColor14SemiBold }}>
             Press Back Once Again to Exit
@@ -41,122 +166,6 @@ const LoginScreen = ({ navigation }) => {
       ) : null}
     </SafeAreaView>
   );
-
-  function loginInfo() {
-    return (
-      <View style={styles.loginInfoWrapStyle}>
-        {emailTextField()}
-        {passwordTextField()}
-        {forgotPasswordText()}
-        {loginButton()}
-        {createAccountText()}
-      </View>
-    );
-  }
-
-  function createAccountText() {
-    return (
-      <Text
-        onPress={() => navigation.navigate('CreateAccount')}
-        style={{
-          marginBottom: Sizes.fixPadding,
-          textAlign: 'center',
-          ...Fonts.blackColor16Bold,
-        }}
-      >
-        CREATE ACCOUNT
-      </Text>
-    );
-  }
-
-  function forgotPasswordText() {
-    return (
-      <Text
-        onPress={() => navigation.push('ResetPassword')}
-        style={{
-          marginTop: Sizes.fixPadding * 2.0,
-          textAlign: 'center',
-          ...Fonts.blackColor16Bold,
-        }}
-      >
-        FORGOT PASSWORD?
-      </Text>
-    );
-  }
-
-  function loginButton() {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.9}
-        onPress={() => navigation.push('CreateAccount')}
-        style={styles.loginButtonStyle}
-      >
-        <Text style={{ ...Fonts.whiteColor15Bold }}>LOGIN</Text>
-      </TouchableOpacity>
-    );
-  }
-
-  function passwordTextField() {
-    return (
-      <View style={styles.textFieldWrapStyle}>
-        <MaterialIcons
-          name="vpn-key"
-          color={passwordFocus ? Colors.primaryColor : Colors.grayColor}
-          size={24}
-        />
-        <TextInput
-          secureTextEntry={true}
-          selectionColor={Colors.primaryColor}
-          placeholder="Password"
-          value={password}
-          onChangeText={text => setPassword(text)}
-          onFocus={() => setPasswordFocus(true)}
-          onBlur={() => setPasswordFocus(false)}
-          style={{
-            flex: 1,
-            marginLeft: Sizes.fixPadding,
-            ...Fonts.blackColor15Medium,
-          }}
-        />
-      </View>
-    );
-  }
-
-  function emailTextField() {
-    return (
-      <View style={styles.textFieldWrapStyle}>
-        <MaterialIcons
-          name="email"
-          color={emailFocus ? Colors.primaryColor : Colors.grayColor}
-          size={24}
-        />
-        <TextInput
-          selectionColor={Colors.primaryColor}
-          placeholder="Email"
-          value={email}
-          onChangeText={text => setEmail(text)}
-          onFocus={() => setEmailFocus(true)}
-          onBlur={() => setEmailFocus(false)}
-          style={{
-            flex: 1,
-            marginLeft: Sizes.fixPadding,
-            ...Fonts.blackColor15Medium,
-          }}
-          keyboardType="email-address"
-        />
-      </View>
-    );
-  }
-
-  function appLogo() {
-    return (
-      <Image
-        source={require('../../assets/images/logo/stylo_transparent.png')}
-        style={{ width: 80.0, height: 80.0, alignSelf: 'center' }}
-        resizeMode="contain"
-      />
-    );
-  }
 };
 
 const styles = StyleSheet.create({

@@ -1,20 +1,16 @@
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import React from 'react';
+import React, { JSX } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import { Colors, Fonts, Sizes } from '../../../constants/styles';
 
-const AboutAppScreen = ({ navigation }) => {
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
-      <StatusBar backgroundColor={Colors.primaryColor} />
-      <View style={{ flex: 1 }}>
-        {header()}
-        {aboutApp()}
-      </View>
-    </SafeAreaView>
-  );
+interface AboutAppScreenProps {
+  navigation: {
+    pop: () => void;
+  };
+}
 
-  function aboutApp() {
+const AboutAppScreen: React.FC<AboutAppScreenProps> = ({ navigation }) => {
+  const aboutApp = (): JSX.Element => {
     return (
       <View style={{ margin: Sizes.fixPadding + 5.0 }}>
         <Text style={{ ...Fonts.blackColor17SemiBold }}>
@@ -53,9 +49,9 @@ const AboutAppScreen = ({ navigation }) => {
         </Text>
       </View>
     );
-  }
+  };
 
-  function header() {
+  const header = (): JSX.Element => {
     return (
       <View style={styles.headerWrapStyle}>
         <MaterialIcons
@@ -74,7 +70,17 @@ const AboutAppScreen = ({ navigation }) => {
         </Text>
       </View>
     );
-  }
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.backColor }}>
+      <StatusBar backgroundColor={Colors.primaryColor} />
+      <View style={{ flex: 1 }}>
+        {header()}
+        {aboutApp()}
+      </View>
+    </SafeAreaView>
+  );
 };
 
 const styles = StyleSheet.create({
