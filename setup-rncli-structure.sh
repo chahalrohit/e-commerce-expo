@@ -1,6 +1,6 @@
 # run command to create folder structure
 # chmod +x setup-rncli-structure.sh
-# ./setup-rncli-structure.sh
+# ./setup-rncli-structure.sh 
 
 set -euo pipefail
 
