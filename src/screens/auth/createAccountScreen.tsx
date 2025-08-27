@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 
 interface NavigationProps {
   push: (screen: string) => void;

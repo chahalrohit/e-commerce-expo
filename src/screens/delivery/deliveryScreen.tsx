@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type RootStackParamList = {

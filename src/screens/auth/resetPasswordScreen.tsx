@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 
 // Define the navigation prop type
 interface NavigationProps {

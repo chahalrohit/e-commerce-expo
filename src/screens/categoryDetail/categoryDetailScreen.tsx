@@ -15,7 +15,7 @@ import {
   ListRenderItem,
 } from 'react-native';
 import Carousel from 'react-native-snap-carousel-v4';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 const { width } = Dimensions.get('window');

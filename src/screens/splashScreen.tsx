@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
 import { Image, SafeAreaView, StatusBar, View } from 'react-native';
 import { Bounce } from 'react-native-animated-spinkit';
-import { Colors, Sizes } from '../../constants/styles';
+import { Colors, Sizes } from '../constants/styles';
 
 // If you're using React Navigation, you can replace this with the proper type.
 // e.g. using @react-navigation/native-stack or @react-navigation/stack.
 // For a minimal, dependency-free typing:
 type SplashScreenProps = {
   navigation: {
-    push: (screen: 'Onboarding') => void,
-  },
+    push: (screen: 'Onboarding') => void;
+  };
 };
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ navigation }) => {

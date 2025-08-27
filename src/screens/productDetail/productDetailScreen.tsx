@@ -20,7 +20,7 @@ import {
 } from 'react-native';
 import { Snackbar } from 'react-native-paper';
 import Carousel, { Pagination } from 'react-native-snap-carousel-v4';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 import AllProductsList from '../../components/products/products';
 
 const { width, height } = Dimensions.get('window');

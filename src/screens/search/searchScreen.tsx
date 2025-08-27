@@ -11,7 +11,7 @@ import {
   TextInput as RNTextInput,
   View,
 } from 'react-native';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 import type { NavigationProp } from '@react-navigation/native';
 
 type SearchScreenProps = {

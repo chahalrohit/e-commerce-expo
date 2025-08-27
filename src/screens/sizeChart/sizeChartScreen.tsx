@@ -12,25 +12,25 @@ import {
   View,
   GestureResponderEvent,
 } from 'react-native';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 
 const { width } = Dimensions.get('window');
 
 type SizeRow = {
-  sizeType: string,
-  valueInInch: string,
-  valueInCm: string,
+  sizeType: string;
+  valueInInch: string;
+  valueInCm: string;
 };
 
 type SizeToggle = {
-  id: 1 | 2,
-  type: 'INCH' | 'CM',
+  id: 1 | 2;
+  type: 'INCH' | 'CM';
 };
 
 type Props = {
   navigation: {
-    pop: () => void,
-  },
+    pop: () => void;
+  };
 };
 
 const SizeChartScreen: FC<Props> = ({ navigation }) => {

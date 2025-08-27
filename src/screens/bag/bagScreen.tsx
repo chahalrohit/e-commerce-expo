@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { Snackbar } from 'react-native-paper';
 import { SwipeListView } from 'react-native-swipe-list-view';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 import type { ListRenderItem } from 'react-native';
 import type { NavigationProp } from '@react-navigation/native';
 

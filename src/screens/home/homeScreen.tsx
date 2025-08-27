@@ -14,7 +14,7 @@ import {
 import Carousel from 'react-native-snap-carousel-v4';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 // ✅ Navigation type (adjust according to your navigator type)

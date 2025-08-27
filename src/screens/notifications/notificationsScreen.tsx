@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { Snackbar } from 'react-native-paper';
 import { SwipeListView } from 'react-native-swipe-list-view';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 
 const { width } = Dimensions.get('window');
 

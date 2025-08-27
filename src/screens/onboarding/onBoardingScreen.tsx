@@ -11,7 +11,7 @@ import {
   ImageSourcePropType,
 } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import { Fonts, Sizes } from '../../../constants/styles';
+import { Fonts, Sizes } from '../../constants/styles';
 
 const { width } = Dimensions.get('window');
 

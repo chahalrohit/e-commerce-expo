@@ -1,7 +1,7 @@
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import React, { JSX } from 'react';
 import { SafeAreaView, StatusBar, StyleSheet, Text, View } from 'react-native';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 
 interface AboutAppScreenProps {
   navigation: {

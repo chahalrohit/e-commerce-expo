@@ -1,19 +1,19 @@
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { DrawerContentScrollView } from '@react-navigation/drawer';
+import { Dialog } from '@rneui/themed';
 import React, { useState } from 'react';
 import {
+  Dimensions,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  Dimensions,
   View,
-  ScrollView,
 } from 'react-native';
 import { Colors, Fonts, Sizes } from '../constants/styles';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import { Dialog } from '@rneui/themed';
 
 const { width } = Dimensions.get('window');
 

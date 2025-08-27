@@ -8,7 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 import { StackNavigationProp } from '@react-navigation/stack';
 
 // ---------- TYPES ----------

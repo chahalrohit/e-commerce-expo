@@ -12,7 +12,7 @@ import {
   ImageSourcePropType,
   ListRenderItemInfo,
 } from 'react-native';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 
 const { width } = Dimensions.get('window');
 

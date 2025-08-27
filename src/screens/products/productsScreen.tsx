@@ -17,7 +17,7 @@ import {
   ListRenderItemInfo,
 } from 'react-native';
 import { Bounce } from 'react-native-animated-spinkit';
-import { Colors, Fonts, Sizes } from '../../../constants/styles';
+import { Colors, Fonts, Sizes } from '../../constants/styles';
 import MenProductsList from '../../components/products/men_products';
 import AllProductsList from '../../components/products/products';
 import WomenProductsList from '../../components/products/women_products';
@@ -70,9 +70,10 @@ const ProductsScreen: React.FC<Props> = ({ navigation }) => {
   const [selectedProductCategory, setSelectedProductCategory] =
     useState<CategoryKey>(productCategoriesList[0].productCategory);
   const [productsList, setProductsList] = useState<Product[]>(
-    AllProductsList as Product[]
+    AllProductsList as Product[],
   );
-  const [showSortBottomSheet, setShowSortBottomSheet] = useState<boolean>(false);
+  const [showSortBottomSheet, setShowSortBottomSheet] =
+    useState<boolean>(false);
   const [currentSortingCriteria, setCurrentSortingCriteria] =
     useState<SortCriterion | null>(null);
 
@@ -118,7 +119,9 @@ const ProductsScreen: React.FC<Props> = ({ navigation }) => {
           <View style={{ flex: 1, height }}>
             <TouchableWithoutFeedback>
               <View style={styles.bottomSheetWrapStyle}>
-                <Text style={{ textAlign: 'center', ...Fonts.blackColor16Bold }}>
+                <Text
+                  style={{ textAlign: 'center', ...Fonts.blackColor16Bold }}
+                >
                   SORT BY
                 </Text>
                 <View style={styles.bottomSheetDividerStyle} />
@@ -202,9 +205,7 @@ const ProductsScreen: React.FC<Props> = ({ navigation }) => {
               {'$'}
               {item.oldPrice}
             </Text>
-            <Text style={{ ...Fonts.greenColor12Medium }}>
-              ({item.offer})
-            </Text>
+            <Text style={{ ...Fonts.greenColor12Medium }}>({item.offer})</Text>
           </View>
         </TouchableOpacity>
       );
@@ -213,7 +214,7 @@ const ProductsScreen: React.FC<Props> = ({ navigation }) => {
     return (
       <FlatList<Product>
         data={productsList}
-        keyExtractor={(p) => String(p.uniqueId)}
+        keyExtractor={p => String(p.uniqueId)}
         renderItem={renderItem}
         numColumns={2}
       />
@@ -306,7 +307,7 @@ const ProductsScreen: React.FC<Props> = ({ navigation }) => {
               ? (MenProductsList as Product[])
               : item.productCategory === 'WOMENS'
               ? (WomenProductsList as Product[])
-              : (AllProductsList as Product[])
+              : (AllProductsList as Product[]),
           );
         }}
         style={{
@@ -334,7 +335,7 @@ const ProductsScreen: React.FC<Props> = ({ navigation }) => {
         <FlatList<CategoryItem>
           horizontal
           data={productCategoriesList}
-          keyExtractor={(c) => c.id}
+          keyExtractor={c => c.id}
           renderItem={renderItem}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
@@ -389,7 +390,11 @@ const ProductsScreen: React.FC<Props> = ({ navigation }) => {
             activeOpacity={0.9}
             onPress={() => navigation.push('Bag')}
           >
-            <FontAwesome5 name="shopping-bag" size={24} color={Colors.blackColor} />
+            <FontAwesome5
+              name="shopping-bag"
+              size={24}
+              color={Colors.blackColor}
+            />
             <View style={styles.favoritsAndShoppingsCountStyle}>
               <Text style={{ ...Fonts.whiteColor12Medium }}>3</Text>
             </View>

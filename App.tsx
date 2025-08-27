@@ -13,8 +13,8 @@ import React from 'react';
 import { LogBox } from 'react-native';
 
 // Screens & components
-import CustomDrawer from './components/drawerContent';
-import LoadingScreen from './components/loadingScreen';
+import CustomDrawer from './src/components/drawerContent';
+import LoadingScreen from './src/components/loadingScreen';
 import AboutAppScreen from './src/screens/aboutApp/aboutAppScreen';
 import AccountScreen from './src/screens/account/accountScreen';
 import AccountSettingScreen from './src/screens/accountSetting/accountSettingScreen';
